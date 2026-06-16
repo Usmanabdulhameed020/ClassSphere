@@ -25,6 +25,8 @@ export default function Login() {
         if (buttonContainer && buttonContainer.children.length === 0) {
           window.google.accounts.id.initialize({
             client_id: googleClientId,
+            ux_mode: 'redirect',
+            login_uri: `${window.location.origin}/login`,
             callback: (response) => {
               handleGoogleLoginSubmit(response.credential);
             }
