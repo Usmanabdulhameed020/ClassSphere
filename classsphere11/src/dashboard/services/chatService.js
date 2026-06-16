@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { getSocket } from '../utils/socketManager';
+import API_BASE_URL from '../../config';
 
-const API_URL = 'http://localhost:5000/api/chat';
+const API_URL = `${API_BASE_URL}/api/chat`;
 
 export const chatService = {
   // Get chat history from server

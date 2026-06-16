@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Lock, User, ArrowRight, Loader2, School, Building2, Key, GraduationCap, Briefcase, ShieldCheck, X } from 'lucide-react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
+import API_BASE_URL from '../config';
 
 export default function SignUp() {
   const [searchParams] = useSearchParams();
@@ -49,7 +50,7 @@ export default function SignUp() {
     setError('');
     
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/google', {
+      const response = await axios.post(`${API_BASE_URL}/api/auth/google`, {
         credential,
         role: role // Use the pre-selected role (student, teacher, admin)
       });
@@ -81,7 +82,7 @@ export default function SignUp() {
     setError('');
 
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/register', {
+      const response = await axios.post(`${API_BASE_URL}/api/auth/register`, {
         username,
         email,
         password,

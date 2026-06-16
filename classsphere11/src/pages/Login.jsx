@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Lock, ArrowRight, Loader2, UserCircle, Key, ArrowLeft } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import API_BASE_URL from '../config';
 
 export default function Login() {
   const [mode, setMode] = useState('login'); // 'login', 'forgot', 'reset'
@@ -45,7 +46,7 @@ export default function Login() {
     setMessage('');
     
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/google', {
+      const response = await axios.post(`${API_BASE_URL}/api/auth/google`, {
         credential,
         role: roleVal
       });
@@ -72,7 +73,7 @@ export default function Login() {
     setMessage('');
 
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/login', {
+      const response = await axios.post(`${API_BASE_URL}/api/auth/login`, {
         email,
         password,
       });
@@ -93,7 +94,7 @@ export default function Login() {
     setMessage('');
 
     try {
-      await axios.post('http://localhost:5000/api/auth/forgot-password', { email });
+      await axios.post(`${API_BASE_URL}/api/auth/forgot-password`, { email });
       setMessage('A reset code has been sent to your email.');
       setMode('reset');
     } catch (err) {
@@ -110,7 +111,7 @@ export default function Login() {
     setMessage('');
 
     try {
-      await axios.post('http://localhost:5000/api/auth/reset-password', {
+      await axios.post(`${API_BASE_URL}/api/auth/reset-password`, {
         email,
         code,
         newPassword,

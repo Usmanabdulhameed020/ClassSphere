@@ -5,6 +5,7 @@ import DashboardRenderer from './components/DashboardRenderer';
 import { dashboardService } from './services/dashboardService';
 import { adminService } from './services/adminService';
 import axios from 'axios';
+import API_BASE_URL from '../config';
 import { ThemeProvider } from './context/ThemeContext';
 import AIAssistant from './components/AIAssistant';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -103,7 +104,7 @@ export default function Dashboard() {
     setIsActionLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.post('http://localhost:5000/api/auth/select-role', { role }, {
+      const res = await axios.post(`${API_BASE_URL}/api/auth/select-role`, { role }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
