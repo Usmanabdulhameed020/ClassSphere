@@ -27,7 +27,7 @@ mongoose.connect(process.env.MONGODB_URI)
 
 // Serve static files from frontend build
 const path = require('path');
-app.use(express.static(path.join(__dirname, '../classsphere11/dist')));
+// app.use(express.static(path.join(__dirname, '../classsphere11/dist')));
 
 // Import Routes
 const authRoutes = require('./routes/auth');
