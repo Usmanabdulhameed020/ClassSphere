@@ -24,32 +24,53 @@ export default function SignUp() {
   const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
   useEffect(() => {
-    if (googleClientId && window.google) {
-      try {
-        const buttonContainer = document.getElementById("googleSignUpRealButton");
-        if (buttonContainer && buttonContainer.children.length === 0) {
-          window.google.accounts.id.initialize({
-            client_id: googleClientId,
-            ux_mode: 'popup',
-            callback: (response) => {
-              handleGoogleLoginSubmit(response.credential);
-            }
-          });
-          window.google.accounts.id.renderButton(
-            buttonContainer,
-            { 
-              theme: "outline", 
-              size: "large", 
-              width: buttonContainer.clientWidth || 320, 
-              text: "signup_with",
-              shape: "pill"
-            }
-          );
+    let checkInterval;
+    
+    const initGoogle = () => {
+      if (googleClientId && window.google) {
+        try {
+          const buttonContainer = document.getElementById("googleSignUpRealButton");
+          if (buttonContainer && buttonContainer.children.length === 0) {
+            window.google.accounts.id.initialize({
+              client_id: googleClientId,
+              ux_mode: 'popup',
+              callback: (response) => {
+                handleGoogleLoginSubmit(response.credential);
+              }
+            });
+            window.google.accounts.id.renderButton(
+              buttonContainer,
+              { 
+                theme: "outline", 
+                size: "large", 
+                width: buttonContainer.clientWidth || 320, 
+                text: "signup_with",
+                shape: "pill"
+              }
+            );
+            if (checkInterval) clearInterval(checkInterval);
+          }
+        } catch (err) {
+          console.error("GSI Init error:", err);
         }
-      } catch (err) {
-        console.error("GSI Init error:", err);
       }
+    };
+
+    // Try immediately
+    initGoogle();
+
+    // Set up polling interval as backup in case script is still loading
+    if (!window.google && googleClientId) {
+      checkInterval = setInterval(() => {
+        if (window.google) {
+          initGoogle();
+        }
+      }, 500);
     }
+
+    return () => {
+      if (checkInterval) clearInterval(checkInterval);
+    };
   }, [googleClientId, role]);
 
   const handleGoogleLoginSubmit = async (credential) => {

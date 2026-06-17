@@ -6,6 +6,15 @@ import { Link } from "react-router-dom";
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    const token = localStorage.getItem('token');
+    if (storedUser && token) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -140,6 +149,36 @@ export default function Navbar() {
             </motion.button>
           </div>
 
+          {/* User Profile / Auth Icon */}
+          <div className="hidden lg:flex items-center mx-1">
+            {user ? (
+              <Link to="/dashboard" className="transition-all active:scale-95">
+                {user.profilePicture ? (
+                  <img 
+                    src={user.profilePicture} 
+                    alt="Avatar" 
+                    className="w-10 h-10 rounded-full object-cover border border-slate-200 hover:ring-4 hover:ring-teal-500/20 transition-all shadow-inner" 
+                  />
+                ) : (
+                  <div className="w-10 h-10 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-full flex items-center justify-center text-sm transition-all shadow-inner">
+                    {user.username?.charAt(0).toUpperCase()}
+                  </div>
+                )}
+              </Link>
+            ) : (
+              <Link to="/login">
+                <motion.button
+                  whileHover={{ scale: 1.05, backgroundColor: "rgba(20, 184, 166, 0.1)" }}
+                  whileTap={{ scale: 0.95 }}
+                  className="p-2 rounded-full text-slate-600 hover:text-teal-600 transition-all"
+                  title="Login / Register"
+                >
+                  <UserCircle className="w-6 h-6" />
+                </motion.button>
+              </Link>
+            )}
+          </div>
+
           <Link to="/contact">
             <motion.div
               whileHover={{ 
@@ -207,13 +246,25 @@ export default function Navbar() {
                     />
                   </form>
                 )}
-                <div className="flex justify-center gap-6 py-2">
+                <div className="flex items-center justify-center gap-6 py-2">
                   <button onClick={() => setIsSearchOpen(!isSearchOpen)}>
                     <Search className={`w-6 h-6 ${isSearchOpen ? 'text-teal-600' : 'text-slate-600'}`} />
                   </button>
-                  <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
-                    <UserCircle className="w-6 h-6 text-slate-600" />
-                  </Link>
+                  {user ? (
+                    <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)} className="transition-all active:scale-95">
+                      {user.profilePicture ? (
+                        <img src={user.profilePicture} alt="Avatar" className="w-8 h-8 rounded-full object-cover border border-slate-200" />
+                      ) : (
+                        <div className="w-8 h-8 bg-teal-600 text-white rounded-full flex items-center justify-center font-bold text-xs">
+                          {user.username?.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                    </Link>
+                  ) : (
+                    <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
+                      <UserCircle className="w-6 h-6 text-slate-600 hover:text-teal-600 transition-colors" />
+                    </Link>
+                  )}
                 </div>
               </div>
             </div>
