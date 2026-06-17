@@ -1,5 +1,7 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom'
+import axios from 'axios'
+import API_BASE_URL from './config'
 import Navbar from './components/Navbar'  
 import Hero from './components/Hero'  
 import IntroAI from './components/IntroAI'
@@ -53,6 +55,18 @@ const LandingRedirect = ({ children }) => {
 const AppContent = () => {
   const location = useLocation();
   const hideNavAndFooter = ['/dashboard', '/login', '/signup'].includes(location.pathname);
+
+  useEffect(() => {
+    // Silent pre-warm check to wake up the backend server (resolves cold start delays)
+    const warmUpBackend = async () => {
+      try {
+        await axios.get(`${API_BASE_URL}/api/auth/me`, { timeout: 8000 });
+      } catch (err) {
+        // Ignore errors, we just want to trigger the server boot
+      }
+    };
+    warmUpBackend();
+  }, []);
 
   return (
     <>

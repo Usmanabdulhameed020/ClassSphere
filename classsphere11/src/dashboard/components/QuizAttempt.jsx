@@ -13,13 +13,13 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function QuizAttempt({ quiz, submission, onSubmit, onCancel, user, onGradeSubmission, onChangeSubmission }) {
+export default function QuizAttempt({ quiz, submission, onSubmit, onCancel, user, onGradeSubmission, onChangeSubmission, isTeacher }) {
   const timeLimit = quiz.questions.length * 120; // 2 minutes per question
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [result, setResult] = useState(null);
-  const [quizStarted, setQuizStarted] = useState(user?.role !== 'student');
+  const [quizStarted, setQuizStarted] = useState(isTeacher);
   const [timeLeft, setTimeLeft] = useState(timeLimit);
 
   // Teacher grading states
@@ -117,7 +117,7 @@ export default function QuizAttempt({ quiz, submission, onSubmit, onCancel, user
     return (
       <div className="max-w-3xl mx-auto space-y-8 pb-20">
         {/* Teacher review header with navigation */}
-        {user?.role === 'teacher' && submission && (
+        {isTeacher && submission && (
           <div className="flex justify-between items-center bg-slate-50 p-4 rounded-2xl border border-slate-100 text-left">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-teal-600 text-white flex items-center justify-center font-black">
@@ -247,7 +247,7 @@ export default function QuizAttempt({ quiz, submission, onSubmit, onCancel, user
           </div>
 
           {/* Teacher Grading and Comments Console */}
-          {user?.role === 'teacher' && submission && (
+          {isTeacher && submission && (
             <form onSubmit={handleSaveGradeAndFeedback} className="bg-slate-50 p-8 rounded-3xl border border-slate-100 text-left space-y-6">
               <h4 className="font-black text-slate-900 uppercase tracking-widest text-xs border-b border-slate-200/50 pb-2">Grading Console</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

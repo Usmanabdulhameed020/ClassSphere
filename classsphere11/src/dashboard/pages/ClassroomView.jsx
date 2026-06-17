@@ -1049,6 +1049,7 @@ export default function ClassroomView({ classData, user, onBack }) {
               user={user}
               onGradeSubmission={handleGradeQuizSubmission}
               onChangeSubmission={handleStepSubmission}
+              isTeacher={isTeacher}
             />
           ) : (
             renderQuizSubmissionsDashboard()
@@ -1060,6 +1061,7 @@ export default function ClassroomView({ classData, user, onBack }) {
             onSubmit={handleSubmitQuiz} 
             onCancel={() => setActiveQuiz(null)} 
             user={user}
+            isTeacher={isTeacher}
           />
         )
       ) : (

@@ -17,7 +17,7 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('Home');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [user, setUser] = useState(null);
-  const [classes, setClasses] = useState([]);
+  const [classes, setClasses] = useState(null);
   const [selectedClass, setSelectedClass] = useState(null);
   const [stats, setStats] = useState({ activeSpheres: 0, citizens: 0, insights: 0 });
   const [isLoading, setIsLoading] = useState(true);
@@ -72,6 +72,7 @@ export default function Dashboard() {
       setUser(parsedUser);
       fetchDashboardData(parsedUser);
       fetchUnreadCount();
+      setIsLoading(false); // Enable progressive rendering of dashboard
       
       // Initialize socket to trigger auto-registration
       const socket = getSocket();

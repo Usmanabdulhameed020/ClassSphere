@@ -206,14 +206,9 @@ export default function Sidebar({ isOpen, activeTab, onTabChange, classes = [], 
             {isOpen && (
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-bold text-slate-800 truncate">{user.username}</p>
-                <span className={cn(
-                  "inline-block px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest mt-1",
-                  user.role === 'teacher' ? "bg-indigo-50 text-indigo-600 border border-indigo-100" :
-                  user.role === 'admin' ? "bg-rose-50 text-rose-600 border border-rose-100" :
-                  "bg-emerald-50 text-emerald-600 border border-emerald-100"
-                )}>
-                  {user.role}
-                </span>
+                <p className="text-[10px] text-teal-600 font-black uppercase tracking-widest mt-1 truncate">
+                  {user.institution || "Ecosystem Member"}
+                </p>
               </div>
             )}
           </div>
