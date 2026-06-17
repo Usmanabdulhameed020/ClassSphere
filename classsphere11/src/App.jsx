@@ -60,7 +60,7 @@ const AppContent = () => {
     // Silent pre-warm check to wake up the backend server (resolves cold start delays)
     const warmUpBackend = async () => {
       try {
-        await axios.get(`${API_BASE_URL}/api/auth/me`, { timeout: 8000 });
+        await axios.get(`${API_BASE_URL}/`, { timeout: 8000 });
       } catch (err) {
         // Ignore errors, we just want to trigger the server boot
       }

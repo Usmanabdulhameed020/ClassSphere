@@ -30,7 +30,7 @@ router.post('/register', async (req, res) => {
     // Trigger Welcome Email Notification
     await sendWelcomeNotification(user.email, user.username);
 
-    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '30d' });
     res.json({ token, user: { id: user._id, username, email, role: user.role } });
   } catch (error) {
     console.error('Auth Error:', error);
@@ -102,7 +102,7 @@ router.post('/select-role', auth, async (req, res) => {
     user.role = role;
     await user.save();
 
-    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '30d' });
 
     res.json({ 
       message: 'Role updated successfully', 
@@ -131,7 +131,7 @@ router.post('/login', async (req, res) => {
       return res.status(403).json({ message: 'Your account has been suspended. Please contact the administrator.' });
     }
 
-    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '30d' });
 
     res.json({ token, user: { id: user._id, username: user.username, email: user.email, role: user.role } });
   } catch (error) {
@@ -199,7 +199,7 @@ router.post('/google', async (req, res) => {
     // Trigger Welcome Email Notification for Google Sign-Up
     await sendWelcomeNotification(user.email, user.username);
 
-    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '30d' });
     res.json({ 
       token, 
       user: { id: user._id, username: user.username, email: user.email, role: user.role },
