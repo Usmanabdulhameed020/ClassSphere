@@ -1,21 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Lock, User, ArrowRight, Loader2, School, Building2, Key, GraduationCap, Briefcase, ShieldCheck, X } from 'lucide-react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { Mail, Lock, User, ArrowRight, Loader2, School, GraduationCap } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import API_BASE_URL from '../config';
 
 export default function SignUp() {
-  const [searchParams] = useSearchParams();
-  const role = searchParams.get('role') || 'student';
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   
-  // Role-specific fields
-  const [extraField1, setExtraField1] = useState(''); // School/Dept/Institution
-  const [extraField2, setExtraField2] = useState(''); // ID/Code
+  // School / University
+  const [school, setSchool] = useState('');
   
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -71,7 +68,7 @@ export default function SignUp() {
     return () => {
       if (checkInterval) clearInterval(checkInterval);
     };
-  }, [googleClientId, role]);
+  }, [googleClientId]);
 
   const handleGoogleLoginSubmit = async (credential) => {
     setIsLoading(true);
@@ -80,7 +77,7 @@ export default function SignUp() {
     try {
       const response = await axios.post(`${API_BASE_URL}/api/auth/google`, {
         credential,
-        role: role // Use the pre-selected role (student, teacher, admin)
+        role: 'student' // default normal user role
       });
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify(response.data.user));
@@ -91,12 +88,6 @@ export default function SignUp() {
       setIsLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (!searchParams.get('role')) {
-      navigate('/select-role');
-    }
-  }, [searchParams, navigate]);
 
   const handleSignUp = async (e) => {
     e.preventDefault();
@@ -114,10 +105,9 @@ export default function SignUp() {
         username,
         email,
         password,
-        role,
+        role: 'student',
         extraFields: {
-          field1: extraField1,
-          field2: extraField2,
+          field1: school,
         }
       });
 
@@ -131,49 +121,6 @@ export default function SignUp() {
     }
   };
 
-  const getRoleConfig = () => {
-    switch (role) {
-      case 'teacher':
-        return {
-          title: 'Teacher Registration',
-          subtitle: 'Empower the next generation of leaders.',
-          icon: <Briefcase className="w-12 h-12" />,
-          field1Label: 'Department',
-          field1Placeholder: 'e.g. Mathematics',
-          field1Icon: <Building2 className="w-5 h-5" />,
-          field2Label: 'Employee ID',
-          field2Placeholder: 'T-XXXXX',
-          field2Icon: <Key className="w-5 h-5" />,
-        };
-      case 'admin':
-        return {
-          title: 'Admin Portal Setup',
-          subtitle: 'Manage and oversee your institutional ecosystem.',
-          icon: <ShieldCheck className="w-12 h-12" />,
-          field1Label: 'Institution Name',
-          field1Placeholder: 'e.g. ClassSphere University',
-          field1Icon: <School className="w-5 h-5" />,
-          field2Label: 'Admin Access Code',
-          field2Placeholder: 'Enter verification code',
-          field2Icon: <Key className="w-5 h-5" />,
-        };
-      default: // student
-        return {
-          title: 'Student Enrollment',
-          subtitle: 'Start your personalized learning journey today.',
-          icon: <GraduationCap className="w-12 h-12" />,
-          field1Label: 'School / University',
-          field1Placeholder: 'e.g. Westside High',
-          field1Icon: <School className="w-5 h-5" />,
-          field2Label: 'Student ID',
-          field2Placeholder: 'S-XXXXX',
-          field2Icon: <Key className="w-5 h-5" />,
-        };
-    }
-  };
-
-  const config = getRoleConfig();
-
   return (
     <div className="min-h-screen bg-white flex items-center justify-center p-4 sm:p-6 pt-24 md:pt-32">
       <div className="w-full max-w-3xl space-y-6 sm:space-y-8">
@@ -185,7 +132,7 @@ export default function SignUp() {
             className="w-16 h-16 sm:w-24 sm:h-24 rounded-2xl sm:rounded-[32px] bg-teal-600 flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-xl shadow-teal-100"
           >
             <div className="text-white scale-75 sm:scale-100">
-              {config.icon}
+              <GraduationCap className="w-12 h-12" />
             </div>
           </motion.div>
           <motion.h2
@@ -193,7 +140,7 @@ export default function SignUp() {
             animate={{ y: 0, opacity: 1 }}
             className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight"
           >
-            {config.title}
+            Create Your Account
           </motion.h2>
           <motion.p
             initial={{ y: 20, opacity: 0 }}
@@ -201,7 +148,7 @@ export default function SignUp() {
             transition={{ delay: 0.1 }}
             className="text-slate-500 font-light text-base sm:text-xl"
           >
-            {config.subtitle}
+            Start your personalized learning journey today.
           </motion.p>
         </div>
 
@@ -250,36 +197,19 @@ export default function SignUp() {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-700 ml-2 uppercase tracking-widest">{config.field1Label}</label>
+            <div className="space-y-2 md:col-span-2">
+              <label className="text-sm font-bold text-slate-700 ml-2 uppercase tracking-widest">School / University</label>
               <div className="relative">
                 <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-                  {config.field1Icon}
+                  <School className="w-5 h-5" />
                 </div>
                 <input
                   type="text"
                   required
-                  value={extraField1}
-                  onChange={(e) => setExtraField1(e.target.value)}
+                  value={school}
+                  onChange={(e) => setSchool(e.target.value)}
                   className="w-full bg-white border border-slate-200 p-4 pl-12 rounded-2xl outline-none focus:border-teal-500 transition-colors text-slate-900"
-                  placeholder={config.field1Placeholder}
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-700 ml-2 uppercase tracking-widest">{config.field2Label}</label>
-              <div className="relative">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-                  {config.field2Icon}
-                </div>
-                <input
-                  type="text"
-                  required
-                  value={extraField2}
-                  onChange={(e) => setExtraField2(e.target.value)}
-                  className="w-full bg-white border border-slate-200 p-4 pl-12 rounded-2xl outline-none focus:border-teal-500 transition-colors text-slate-900"
-                  placeholder={config.field2Placeholder}
+                  placeholder="e.g. Westside High"
                 />
               </div>
             </div>
@@ -329,20 +259,20 @@ export default function SignUp() {
             )}
           </button>
 
-              <div className="relative flex py-2 items-center">
-                  <div className="flex-grow border-t border-slate-200"></div>
-                  <span className="flex-shrink mx-4 text-slate-400 text-xs font-bold uppercase tracking-widest">Or</span>
-                  <div className="flex-grow border-t border-slate-200"></div>
-              </div>
+          <div className="relative flex py-2 items-center">
+              <div className="flex-grow border-t border-slate-200"></div>
+              <span className="flex-shrink mx-4 text-slate-400 text-xs font-bold uppercase tracking-widest">Or</span>
+              <div className="flex-grow border-t border-slate-200"></div>
+          </div>
 
-              <div className="flex justify-center w-full min-h-[44px] my-2">
-                <div id="googleSignUpRealButton" className="w-full [&>div]:!w-full [&>div]:!max-w-full"></div>
-                {!googleClientId && (
-                  <div className="w-full text-xs text-slate-400 font-bold bg-amber-50 p-4 rounded-2xl border border-amber-100 text-center">
-                    ⚠️ Google Auth not configured.
-                  </div>
-                )}
+          <div className="flex justify-center w-full min-h-[44px] my-2">
+            <div id="googleSignUpRealButton" className="w-full [&>div]:!w-full [&>div]:!max-w-full"></div>
+            {!googleClientId && (
+              <div className="w-full text-xs text-slate-400 font-bold bg-amber-50 p-4 rounded-2xl border border-amber-100 text-center">
+                ⚠️ Google Auth not configured.
               </div>
+            )}
+          </div>
         </motion.form>
 
         {/* Footer */}

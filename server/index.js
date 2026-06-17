@@ -37,7 +37,6 @@ const path = require('path');
 const authRoutes = require('./routes/auth');
 const classRoutes = require('./routes/classes');
 const classroomRoutes = require('./routes/classroom');
-const adminRoutes = require('./routes/admin');
 const attendanceRoutes = require('./routes/attendance');
 const quizRoutes = require('./routes/quizzes');
 const aiRoutes = require('./routes/ai');
@@ -50,7 +49,6 @@ const Message = require('./models/Message');
 app.use('/api/auth', authRoutes);
 app.use('/api/classes', classRoutes);
 app.use('/api/classroom', classroomRoutes);
-app.use('/api/admin', adminRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/quizzes', quizRoutes);
 app.use('/api/ai', aiRoutes);
@@ -205,7 +203,7 @@ io.on('connection', (socket) => {
       const users = classRooms[classId];
       const stats = {
         total: users.length,
-        admins: users.filter(u => u.role?.toLowerCase() === 'admin').length,
+        admins: 0,
         teachers: users.filter(u => u.role?.toLowerCase() === 'teacher').length,
         students: users.filter(u => u.role?.toLowerCase() === 'student').length,
         users: users
@@ -227,7 +225,7 @@ io.on('connection', (socket) => {
     if (classRooms[classId]) {
       const users = classRooms[classId];
       callback({
-        admins: users.filter(u => u.role?.toLowerCase() === 'admin'),
+        admins: [],
         teachers: users.filter(u => u.role?.toLowerCase() === 'teacher'),
         students: users.filter(u => u.role?.toLowerCase() === 'student')
       });

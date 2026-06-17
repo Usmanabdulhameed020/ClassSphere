@@ -17,11 +17,11 @@ router.get('/summary', auth, async (req, res) => {
     const lastMonth = new Date();
     lastMonth.setDate(lastMonth.getDate() - 30);
 
-    if (role === 'teacher' || role === 'admin') {
-      const classes = role === 'admin'
-        ? await Class.find({ creator: userId })
-        : await Class.find({ teachers: userId });
-      const classIds = classes.map(c => c._id);
+    const teacherClasses = await Class.find({ teachers: userId });
+    const studentClasses = await Class.find({ students: userId });
+
+    if (teacherClasses.length > 0) {
+      const classIds = teacherClasses.map(c => c._id);
 
       const [totalAssignments, attendanceRecords, assignmentIds] = await Promise.all([
         Assignment.countDocuments({ classId: { $in: classIds } }),
@@ -34,7 +34,7 @@ router.get('/summary', auth, async (req, res) => {
         status: 'Submitted'
       });
 
-      const totalStudents = classes.reduce((acc, c) => acc + c.students.length, 0);
+      const totalStudents = teacherClasses.reduce((acc, c) => acc + c.students.length, 0);
       
       let totalPossible = 0;
       let actualPresent = 0;
@@ -48,7 +48,7 @@ router.get('/summary', auth, async (req, res) => {
       const attendanceRate = totalPossible > 0 ? Math.round((actualPresent / totalPossible) * 100) : 100;
 
       res.json({
-        totalClasses: classes.length,
+        totalClasses: teacherClasses.length,
         totalStudents,
         totalAssignments,
         pendingSubmissions,
@@ -56,9 +56,8 @@ router.get('/summary', auth, async (req, res) => {
         trend: '+5%'
       });
 
-    } else if (role === 'student') {
-      const classes = await Class.find({ students: userId });
-      const classIds = classes.map(c => c._id);
+    } else {
+      const classIds = studentClasses.map(c => c._id);
 
       const [assignments, submissions, attendanceRecords] = await Promise.all([
         Assignment.find({ classId: { $in: classIds } }),
@@ -87,27 +86,12 @@ router.get('/summary', auth, async (req, res) => {
       const attendanceRate = studentTotal > 0 ? Math.round((studentPresent / studentTotal) * 100) : 100;
 
       res.json({
-        enrolledClasses: classes.length,
+        enrolledClasses: studentClasses.length,
         upcomingTasks: upcoming,
         completedTasks: completed,
         avgGrade: `${avgGrade}%`,
         attendanceRate: `${attendanceRate}%`,
         trend: '+2%'
-      });
-    } else if (role === 'admin') {
-      const [totalUsers, totalClasses, teachers, students] = await Promise.all([
-        User.countDocuments(),
-        Class.countDocuments(),
-        User.countDocuments({ role: 'teacher' }),
-        User.countDocuments({ role: 'student' })
-      ]);
-      res.json({
-        totalUsers,
-        totalClasses,
-        teachers,
-        students,
-        systemHealth: 'Healthy',
-        trend: '+12%'
       });
     }
   } catch (error) {

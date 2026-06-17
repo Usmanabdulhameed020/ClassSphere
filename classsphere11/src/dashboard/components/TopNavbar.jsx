@@ -7,7 +7,7 @@ import { notificationService } from '../services/notificationService';
 import { getSocket } from '../utils/socketManager';
 import { useTheme } from '../context/ThemeContext';
 
-export default function TopNavbar({ onToggleSidebar, user, classes = [], onSelectClass, onJoinClass, onCreateClass, onAdminClick, onLogoClick, onSettingsClick }) {
+export default function TopNavbar({ onToggleSidebar, user, classes = [], onSelectClass, onJoinClass, onCreateClass, onLogoClick, onSettingsClick }) {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isPlusMenuOpen, setIsPlusMenuOpen] = useState(false);
   const [isSpheresMenuOpen, setIsSpheresMenuOpen] = useState(false);
@@ -144,14 +144,12 @@ export default function TopNavbar({ onToggleSidebar, user, classes = [], onSelec
                   >
                     {t('joinClass')}
                   </button>
-                  {user?.role === 'admin' && (
-                    <button 
-                      className="w-full text-left px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 rounded-lg transition-all flex items-center gap-3"
-                      onClick={() => { setIsPlusMenuOpen(false); onCreateClass(); }}
-                    >
-                      {t('createClass')}
-                    </button>
-                  )}
+                  <button 
+                    className="w-full text-left px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 rounded-lg transition-all flex items-center gap-3"
+                    onClick={() => { setIsPlusMenuOpen(false); onCreateClass(); }}
+                  >
+                    {t('createClass')}
+                  </button>
                 </motion.div>
               </>
             )}

@@ -3,7 +3,6 @@ import TopNavbar from './components/TopNavbar';
 import Sidebar from './components/Sidebar';
 import DashboardRenderer from './components/DashboardRenderer';
 import { dashboardService } from './services/dashboardService';
-import { adminService } from './services/adminService';
 import axios from 'axios';
 import API_BASE_URL from '../config';
 import { ThemeProvider } from './context/ThemeContext';
@@ -29,7 +28,7 @@ export default function Dashboard() {
   const [classCode, setClassCode] = useState('');
   const [newClassData, setNewClassData] = useState({ name: '', section: '', subject: '' });
   const [isActionLoading, setIsActionLoading] = useState(false);
-  const [showRoleModal, setShowRoleModal] = useState(false);
+
   const [isAIOpen, setIsAIOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -69,10 +68,7 @@ export default function Dashboard() {
     const storedUser = localStorage.getItem('user');
     const parsedUser = storedUser ? JSON.parse(storedUser) : null;
     if (parsedUser) {
-      if (parsedUser.role === 'pending') {
-        navigate('/select-role');
-        return;
-      }
+
       setUser(parsedUser);
       fetchDashboardData(parsedUser);
       fetchUnreadCount();
@@ -87,10 +83,7 @@ export default function Dashboard() {
         socket.on('receivePrivateMessage', handleNewMessage);
       }
       
-      // Check if it's the first login from Google
-      if (localStorage.getItem('isFirstLogin') === 'true') {
-        setShowRoleModal(true);
-      }
+
 
       return () => {
         if (socket) {
@@ -102,26 +95,7 @@ export default function Dashboard() {
     }
   }, []);
 
-  const handleUpdateRole = async (role) => {
-    setIsActionLoading(true);
-    try {
-      const token = localStorage.getItem('token');
-      const res = await axios.post(`${API_BASE_URL}/api/auth/select-role`, { role }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
-      const updatedUser = res.data.user;
-      localStorage.setItem('user', JSON.stringify(updatedUser));
-      localStorage.removeItem('isFirstLogin');
-      setUser(updatedUser);
-      setShowRoleModal(false);
-      fetchDashboardData(updatedUser);
-    } catch (err) {
-      alert('Failed to update role');
-    } finally {
-      setIsActionLoading(false);
-    }
-  };
+
 
   const fetchDashboardData = async (currentUser) => {
     // We don't necessarily need to block the whole UI with a giant spinner 
@@ -212,10 +186,6 @@ export default function Dashboard() {
         }}
         onJoinClass={() => setShowJoinModal(true)}
         onCreateClass={() => setShowCreateModal(true)}
-        onAdminClick={() => {
-          setSelectedClass(null);
-          setActiveTab('Admin');
-        }}
         onLogoClick={() => {
           setSelectedClass(null);
           setActiveTab('Home');
@@ -390,47 +360,7 @@ export default function Dashboard() {
           </div>
         )}
 
-        {showRoleModal && (
-          <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
-            <motion.div 
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-slate-900/60 backdrop-blur-xl"
-            />
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              className="bg-white rounded-[3rem] shadow-2xl w-full max-w-xl relative z-10 overflow-hidden border border-white/20 p-10 text-center space-y-8"
-            >
-              <div className="space-y-4">
-                <h3 className="text-3xl font-black text-slate-900">Welcome to ClassSphere!</h3>
-                <p className="text-slate-500 text-lg">To personalize your experience, please select your primary role in the ecosystem.</p>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {['Student', 'Teacher', 'Admin'].map((role) => (
-                  <button
-                    key={role}
-                    onClick={() => handleUpdateRole(role.toLowerCase())}
-                    disabled={isActionLoading}
-                    className="p-6 rounded-[2rem] bg-slate-50 border-2 border-transparent hover:border-teal-500 hover:bg-white transition-all group"
-                  >
-                    <div className="w-12 h-12 bg-teal-100 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-teal-600 transition-colors">
-                      <Plus className="text-teal-600 group-hover:text-white" />
-                    </div>
-                    <span className="font-black text-slate-900 uppercase tracking-widest text-xs">{role}</span>
-                  </button>
-                ))}
-              </div>
-
-              {isActionLoading && (
-                <div className="flex items-center justify-center gap-2 text-teal-600 font-bold">
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  <span>Configuring your profile...</span>
-                </div>
-              )}
-            </motion.div>
-          </div>
-        )}
       </AnimatePresence>
 
       {/* Mobile Bottom Navigation Bar */}

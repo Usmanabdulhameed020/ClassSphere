@@ -7,9 +7,9 @@ const crypto = require('crypto');
 const { createNotification } = require('./notifications');
 
 // @route   POST /api/classes
-// @desc    Create a new class (Admin only)
-router.post('/', auth, requireRole('admin'), async (req, res) => {
-  const { name, section, room, subject, color, teacherLimit } = req.body;
+// @desc    Create a new class (Any registered user)
+router.post('/', auth, async (req, res) => {
+  const { name, section, room, subject, color } = req.body;
 
   try {
     const code = crypto.randomBytes(3).toString('hex'); // 6 char code
@@ -21,8 +21,8 @@ router.post('/', auth, requireRole('admin'), async (req, res) => {
       subject,
       color,
       creator: req.user.id,
-      teachers: [], // Empty initially, teacher will join via code
-      teacherLimit: 1, // FORCE ONLY ONE TEACHER/ADMIN PER CLASS
+      teachers: [req.user.id], // Automatically add creator as the teacher
+      teacherLimit: 1, 
       code,
     });
 
@@ -65,31 +65,20 @@ router.post('/join', auth, async (req, res) => {
     const cls = await Class.findOne({ code });
     if (!cls) return res.status(404).json({ message: 'Class not found' });
 
-    // Check user role from the request (in a real app, you'd verify this against DB)
-    // For this prototype, we'll trust the req.user object populated by auth middleware
-    const userRole = req.user.role;
-
-    if (userRole === 'teacher') {
-      if (cls.teachers.includes(req.user.id)) {
-        return res.status(400).json({ message: 'Already a teacher in this class' });
-      }
-      if (cls.teachers.length >= cls.teacherLimit) {
-        return res.status(400).json({ 
-          message: 'The administrative limit for instructors in this class has been reached. Please contact your administrator for more slots.' 
-        });
-      }
-      cls.teachers.push(req.user.id);
-    } else {
-      // Default to student join
-      if (cls.students.includes(req.user.id)) {
-        return res.status(400).json({ message: 'Already joined this class as a student' });
-      }
-      cls.students.push(req.user.id);
+    // Ensure creator / co-teachers cannot join as students
+    if (cls.creator.toString() === req.user.id.toString() || cls.teachers.includes(req.user.id)) {
+      return res.status(400).json({ message: 'Already joined this class as the instructor' });
     }
+
+    // Default to student join
+    if (cls.students.includes(req.user.id)) {
+      return res.status(400).json({ message: 'Already joined this class as a student' });
+    }
+    cls.students.push(req.user.id);
 
     await cls.save();
 
-    // Create notifications for teachers and creator (admin) about the new member
+    // Create notifications for teachers and creator about the new member
     const recipients = [];
     if (cls.creator) recipients.push(cls.creator);
     if (cls.teachers) {
@@ -105,10 +94,8 @@ router.post('/join', auth, async (req, res) => {
         recipient: recipientId,
         sender: req.user.id,
         type: 'system',
-        title: userRole === 'teacher' ? 'Instructor Joined Sphere' : 'New Member Enlisted',
-        message: userRole === 'teacher' 
-          ? `${req.user.username} joined "${cls.name}" as an instructor.` 
-          : `${req.user.username} joined "${cls.name}" as a student.`,
+        title: 'New Member Enlisted',
+        message: `${req.user.username} joined "${cls.name}" as a student.`,
         link: '/dashboard'
       });
     }

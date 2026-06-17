@@ -21,17 +21,9 @@ router.post('/register', async (req, res) => {
       username, 
       email, 
       password, 
-      role,
-      institution: extraFields?.field1,
-      department: role === 'teacher' ? extraFields?.field1 : undefined,
-      employeeID: role === 'teacher' ? extraFields?.field2 : undefined,
-      studentID: role === 'student' ? extraFields?.field2 : undefined
+      role: 'student',
+      institution: extraFields?.field1
     });
-    
-    // Override institution if it's admin/student
-    if (role === 'admin' || role === 'student') {
-        user.institution = extraFields?.field1;
-    }
 
     await user.save();
 
@@ -99,7 +91,7 @@ router.post('/reset-password', async (req, res) => {
 router.post('/select-role', auth, async (req, res) => {
   const { role } = req.body;
 
-  if (!['student', 'teacher', 'admin'].includes(role)) {
+  if (!['student', 'teacher'].includes(role)) {
     return res.status(400).json({ message: 'Invalid role' });
   }
 
@@ -192,7 +184,7 @@ router.post('/google', async (req, res) => {
     }
 
     const password = Math.random().toString(36).substring(2, 15);
-    const initialRole = ['student', 'teacher', 'admin'].includes(role) ? role : 'pending';
+    const initialRole = 'student';
     
     user = new User({
       username: uniqueUsername,

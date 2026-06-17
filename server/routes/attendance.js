@@ -37,11 +37,6 @@ router.post('/:classId', auth, async (req, res) => {
   const { date, records } = req.body;
 
   try {
-    // Check if user is teacher of the class
-    if (req.user.role !== 'teacher') {
-      return res.status(403).json({ message: 'Only teachers can mark attendance' });
-    }
-
     const cls = await Class.findById(req.params.classId);
     if (!cls.teachers.includes(req.user.id)) {
       return res.status(403).json({ message: 'Only authorized teachers for this class can mark attendance' });

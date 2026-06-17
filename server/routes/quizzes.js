@@ -88,8 +88,11 @@ router.post('/quiz/:quizId/submit', auth, async (req, res) => {
 // @desc    Get all submissions for a quiz (teachers get all, students get only their own)
 router.get('/quiz/:quizId/submissions', auth, async (req, res) => {
   try {
-    const query = { quizId: req.params.quizId };
-    if (req.user.role === 'student') {
+    const quiz = await Quiz.findById(req.params.quizId);
+    if (!quiz) return res.status(404).json({ message: 'Quiz not found' });
+    const cls = await Class.findById(quiz.classId);
+    const isTeacher = cls && cls.teachers.includes(req.user.id);
+    if (!isTeacher) {
       query.studentId = req.user.id;
     }
     const submissions = await QuizSubmission.find(query)
@@ -106,7 +109,9 @@ router.get('/class/:classId/submissions', auth, async (req, res) => {
   try {
     const quizIds = await Quiz.find({ classId: req.params.classId }).distinct('_id');
     const query = { quizId: { $in: quizIds } };
-    if (req.user.role === 'student') {
+    const cls = await Class.findById(req.params.classId);
+    const isTeacher = cls && cls.teachers.includes(req.user.id);
+    if (!isTeacher) {
       query.studentId = req.user.id;
     }
     const submissions = await QuizSubmission.find(query)
@@ -123,10 +128,6 @@ router.get('/class/:classId/submissions', auth, async (req, res) => {
 router.patch('/submissions/:submissionId/grade', auth, async (req, res) => {
   const { score, feedback } = req.body;
   try {
-    if (req.user.role !== 'teacher') {
-      return res.status(403).json({ message: 'Only teachers can grade submissions' });
-    }
-
     const submission = await QuizSubmission.findById(req.params.submissionId).populate('quizId');
     if (!submission) return res.status(404).json({ message: 'Submission not found' });
 

@@ -90,16 +90,7 @@ export default function StatsOverview({ user, onSelectClass, onCreateClass }) {
       ];
     }
 
-    if (user.role === 'admin') {
-      return [
-        { title: 'Total Citizens', value: summary?.totalUsers || 0, icon: Users, trend: 'System-wide', color: 'bg-teal-600' },
-        { title: 'Total Spheres', value: summary?.totalClasses || 0, icon: BookOpen, trend: 'All classes', color: 'bg-indigo-600' },
-        { title: 'Faculty Members', value: summary?.teachers || 0, icon: Users, trend: 'Teachers', color: 'bg-emerald-600' },
-        { title: 'Student Base', value: summary?.students || 0, icon: Users, trend: 'Students', color: 'bg-amber-500' },
-      ];
-    }
-
-    if (user.role === 'teacher') {
+    if (summary && summary.totalStudents !== undefined) {
       return [
         { title: 'Total Spheres', value: summary?.totalClasses || 0, icon: BookOpen, trend: summary?.trend || '+0%', color: 'bg-teal-600' },
         { title: 'Active Students', value: summary?.totalStudents || 0, icon: Users, trend: summary?.trend || '+0%', color: 'bg-indigo-600' },
@@ -107,6 +98,7 @@ export default function StatsOverview({ user, onSelectClass, onCreateClass }) {
         { title: 'Attendance Rate', value: summary?.attendanceRate || '0%', icon: TrendingUp, trend: '+0%', color: 'bg-emerald-600' },
       ];
     }
+
     return [
       { title: 'Enrolled Spheres', value: summary?.enrolledClasses || 0, icon: BookOpen, trend: summary?.trend || '+0%', color: 'bg-teal-600' },
       { title: 'Upcoming Tasks', value: summary?.upcomingTasks || 0, icon: Clock, trend: 'Due soon', color: 'bg-orange-500' },
@@ -210,7 +202,6 @@ export default function StatsOverview({ user, onSelectClass, onCreateClass }) {
               </div>
             )}
           </div>
-          {(user?.role === 'admin' || user?.role === 'teacher') && (
             <button 
               onClick={onCreateClass}
               className="w-full mt-6 py-4 bg-slate-900 text-white rounded-2xl font-black text-sm flex items-center justify-center gap-2 hover:bg-slate-800 transition-all shadow-lg shadow-slate-200"
@@ -218,7 +209,6 @@ export default function StatsOverview({ user, onSelectClass, onCreateClass }) {
               <Plus className="w-5 h-5" />
               Create New Sphere
             </button>
-          )}
         </div>
       </div>
 

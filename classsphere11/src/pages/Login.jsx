@@ -80,11 +80,7 @@ export default function Login() {
       });
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify(response.data.user));
-      if (response.data.user.role === 'pending') {
-        navigate('/select-role');
-      } else {
-        navigate('/dashboard');
-      }
+      navigate('/dashboard');
 
     } catch (err) {
       console.error('Google Auth Error Details:', err.response?.data);
@@ -390,7 +386,7 @@ export default function Login() {
         {/* Footer */}
         <p className="text-center text-slate-500 font-light">
           Don't have an account?{' '}
-          <Link to="/select-role" className="text-teal-600 font-bold hover:underline">Create an Account</Link>
+          <Link to="/signup" className="text-teal-600 font-bold hover:underline">Create an Account</Link>
         </p>
       </div>
     </div>

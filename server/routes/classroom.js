@@ -114,10 +114,6 @@ router.get('/:classId/assignments', auth, async (req, res) => {
 // @route   POST /api/classroom/:classId/assignments
 router.post('/:classId/assignments', auth, async (req, res) => {
   try {
-    if (req.user.role !== 'teacher') {
-      return res.status(403).json({ message: 'Only instructors (Teachers) can establish new assignments.' });
-    }
-
     const cls = await Class.findById(req.params.classId);
     if (!cls.teachers.includes(req.user.id)) {
       return res.status(403).json({ message: 'You are not an authorized instructor for this sphere.' });
@@ -164,10 +160,6 @@ router.get('/:classId/materials', auth, async (req, res) => {
 // @route   POST /api/classroom/:classId/materials
 router.post('/:classId/materials', auth, async (req, res) => {
   try {
-    if (req.user.role !== 'teacher') {
-      return res.status(403).json({ message: 'Only instructors (Teachers) can post new learning materials.' });
-    }
-
     const cls = await Class.findById(req.params.classId);
     if (!cls.teachers.includes(req.user.id)) {
       return res.status(403).json({ message: 'You are not an authorized instructor for this sphere.' });
@@ -249,10 +241,6 @@ router.patch('/submissions/:submissionId/grade', auth, async (req, res) => {
     const submission = await Submission.findById(req.params.submissionId).populate('assignmentId');
     const cls = await Class.findById(submission.assignmentId.classId);
     
-    if (req.user.role !== 'teacher') {
-      return res.status(403).json({ message: 'Only teachers can grade submissions' });
-    }
-
     if (!cls.teachers.includes(req.user.id)) {
       return res.status(403).json({ message: 'Only authorized teachers for this class can grade submissions' });
     }

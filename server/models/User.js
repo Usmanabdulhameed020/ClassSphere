@@ -18,7 +18,7 @@ const UserSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['student', 'teacher', 'admin', 'pending'],
+    enum: ['student', 'teacher', 'pending'],
     default: 'pending',
   },
   isSuspended: {

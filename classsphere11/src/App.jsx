@@ -32,7 +32,7 @@ import Pilot from './pages/Pilot'
 import Sales from './pages/Sales'
 import Login from './pages/Login'
 import SignUp from './pages/SignUp'
-import RoleSelection from './pages/RoleSelection'
+
 import Dashboard from './dashboard/Dashboard'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 import Terms from './pages/Terms'
@@ -52,7 +52,7 @@ const LandingRedirect = ({ children }) => {
 
 const AppContent = () => {
   const location = useLocation();
-  const hideNavAndFooter = ['/dashboard', '/login', '/signup', '/select-role'].includes(location.pathname);
+  const hideNavAndFooter = ['/dashboard', '/login', '/signup'].includes(location.pathname);
 
   return (
     <>
@@ -94,7 +94,7 @@ const AppContent = () => {
         <Route path="/sales" element={<Sales />} />
         <Route path="/login" element={<LandingRedirect><Login /></LandingRedirect>} />
         <Route path="/signup" element={<LandingRedirect><SignUp /></LandingRedirect>} />
-        <Route path="/select-role" element={<RoleSelection />} />
+
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<Terms />} />

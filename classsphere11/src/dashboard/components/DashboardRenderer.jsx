@@ -5,9 +5,6 @@ import CalendarPage from '../pages/CalendarPage';
 import AssignmentsPage from '../pages/AssignmentsPage';
 import MaterialsPage from '../pages/MaterialsPage';
 import MessagesPage from '../pages/MessagesPage';
-import AdminDashboard from '../pages/AdminDashboard';
-import ClassManagement from '../pages/ClassManagement';
-import UserManagement from '../pages/UserManagement';
 import SettingsPage from '../pages/SettingsPage';
 import ClassroomView from '../pages/ClassroomView';
 import ActivityPage from '../pages/ActivityPage';
@@ -52,15 +49,6 @@ export default function DashboardRenderer({
     
     case 'Activity':
       return <ActivityPage />;
-
-    case 'Admin':
-      return <AdminDashboard onNavigate={onTabChange} />;
-    
-    case 'Users':
-      return <UserManagement />;
-    
-    case 'Classes':
-      return <ClassManagement onSelectClass={onSelectClass} />;
     
     case 'Settings':
       return <SettingsPage user={user} />;
