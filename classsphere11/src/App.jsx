@@ -1,5 +1,5 @@
 import React from 'react'
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom'
 import Navbar from './components/Navbar'  
 import Hero from './components/Hero'  
 import IntroAI from './components/IntroAI'
@@ -39,6 +39,17 @@ import Terms from './pages/Terms'
 
 import GlobalAlertModal from './components/GlobalAlertModal'
 
+const LandingRedirect = ({ children }) => {
+  const token = localStorage.getItem('token');
+  const user = localStorage.getItem('user');
+  
+  if (token && user) {
+    return <Navigate to="/dashboard" replace />;
+  }
+  
+  return children;
+};
+
 const AppContent = () => {
   const location = useLocation();
   const hideNavAndFooter = ['/dashboard', '/login', '/signup', '/select-role'].includes(location.pathname);
@@ -49,16 +60,18 @@ const AppContent = () => {
       {!hideNavAndFooter && <Navbar />}
       <Routes>
         <Route path="/" element={
-          <>
-            <Hero />
-            <IntroAI />
-            <ISS />
-            <CommandCenter />
-            <EcosystemHub />
-            <InsightsEngine />
-            <GuardianPortal />
-            <FinalClosure />
-          </>
+          <LandingRedirect>
+            <>
+              <Hero />
+              <IntroAI />
+              <ISS />
+              <CommandCenter />
+              <EcosystemHub />
+              <InsightsEngine />
+              <GuardianPortal />
+              <FinalClosure />
+            </>
+          </LandingRedirect>
         } />
         <Route path="/about" element={<About />} />
         <Route path="/services" element={<Services />} />
@@ -79,8 +92,8 @@ const AppContent = () => {
         <Route path="/encryption" element={<Encryption />} />
         <Route path="/pilot" element={<Pilot />} />
         <Route path="/sales" element={<Sales />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<SignUp />} />
+        <Route path="/login" element={<LandingRedirect><Login /></LandingRedirect>} />
+        <Route path="/signup" element={<LandingRedirect><SignUp /></LandingRedirect>} />
         <Route path="/select-role" element={<RoleSelection />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />

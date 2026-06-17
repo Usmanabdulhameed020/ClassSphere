@@ -67,6 +67,7 @@ app.get(/^(?!\/api).+/, (req, res) => {
 // Real-time Socket.io Events
 const classRooms = {}; // Track users in each class
 const connectedUsers = new Map(); // Track online users
+const whiteboardHistory = {}; // Track whiteboard strokes in each class
 
 // Expose io and connectedUsers globally so routes can send real-time events
 global.io = io;
@@ -157,6 +158,45 @@ io.on('connection', (socket) => {
   socket.on('typing', (data) => {
     const { classId, username, isTyping } = data;
     socket.to(`class-${classId}`).emit('userTyping', { username, isTyping });
+  });
+
+  // Real-time Whiteboard sync events
+  socket.on('draw-stroke', (data) => {
+    const { classId, stroke } = data;
+    if (!whiteboardHistory[classId]) {
+      whiteboardHistory[classId] = [];
+    }
+    whiteboardHistory[classId].push(stroke);
+    if (whiteboardHistory[classId].length > 2000) {
+      whiteboardHistory[classId].shift(); // Keep history size bounded
+    }
+    socket.to(`class-${classId}`).emit('draw-stroke', stroke);
+  });
+
+  socket.on('clear-canvas', (data) => {
+    const { classId } = data;
+    whiteboardHistory[classId] = [];
+    socket.to(`class-${classId}`).emit('clear-canvas');
+  });
+
+  socket.on('get-whiteboard-history', (classId, callback) => {
+    if (typeof callback === 'function') {
+      callback(whiteboardHistory[classId] || []);
+    }
+  });
+
+  // Chat Read Receipts
+  socket.on('read-class-messages', async (data) => {
+    const { classId, userId, username } = data;
+    try {
+      await Message.updateMany(
+        { classId, sender: { $ne: userId }, 'readBy.userId': { $ne: userId } },
+        { $push: { readBy: { userId, username, readAt: new Date() } } }
+      );
+      io.to(`class-${classId}`).emit('userReadMessages', { classId, userId, username });
+    } catch (error) {
+      console.error('Error marking messages as read:', error);
+    }
   });
 
   // Get current users in a class

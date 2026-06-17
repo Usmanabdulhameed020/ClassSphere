@@ -16,17 +16,60 @@ import {
   Loader2,
   CheckCircle2,
   Trophy,
-  ClipboardCheck
+  ClipboardCheck,
+  Sparkles
 } from 'lucide-react';
+import axios from 'axios';
+import API_BASE_URL from '../../config';
 import { motion, AnimatePresence } from 'framer-motion';
 import { dashboardService } from '../services/dashboardService';
 import { cn } from '../utils';
 import QuizBuilder from '../components/QuizBuilder';
 import QuizAttempt from '../components/QuizAttempt';
 import Chat from '../components/Chat';
+import Whiteboard from '../components/Whiteboard';
 import { joinClassRoom, leaveClassRoom, getSocket } from '../utils/socketManager';
 
-export default function ClassroomView({ classData, onBack, user }) {
+export default function ClassroomView({ classData, user, onBack }) {
+  const [activeTab, setActiveTab] = useState('stream');
+
+  // AI Summarizer State
+  const [selectedSummaryMat, setSelectedSummaryMat] = useState(null);
+  const [summaryData, setSummaryData] = useState(null);
+  const [isSummarizing, setIsSummarizing] = useState(false);
+  const [summaryError, setSummaryError] = useState('');
+  const [flippedFlashcards, setFlippedFlashcards] = useState({});
+
+  const handleSummarizeMaterial = async (mat) => {
+    setSelectedSummaryMat(mat);
+    setIsSummarizing(true);
+    setSummaryData(null);
+    setSummaryError('');
+    setFlippedFlashcards({});
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.post(`${API_BASE_URL}/api/ai/summarize-material`, {
+        materialId: mat._id
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (res.data.success) {
+        setSummaryData({
+          summary: res.data.summary,
+          keyTakeaways: res.data.keyTakeaways,
+          flashcards: res.data.flashcards
+        });
+      } else {
+        setSummaryError('Failed to generate summary. Please try again.');
+      }
+    } catch (err) {
+      console.error(err);
+      setSummaryError(err.response?.data?.message || 'Error communicating with Gemini AI.');
+    } finally {
+      setIsSummarizing(false);
+    }
+  };
   const [activeSubTab, setActiveSubTab] = useState('Stream');
   const [announcements, setAnnouncements] = useState([]);
   const [assignments, setAssignments] = useState([]);
@@ -601,6 +644,17 @@ export default function ClassroomView({ classData, onBack, user }) {
                   <h4 className="font-black text-slate-900 group-hover:text-teal-600 transition-colors">{mat.title}</h4>
                   <p className="text-xs text-slate-400 font-bold mt-1">{mat.description || 'Reference material'}</p>
                 </div>
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleSummarizeMaterial(mat);
+                  }}
+                  className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-teal-50/10 to-indigo-50/10 text-teal-600 hover:from-teal-600 hover:to-teal-700 hover:text-white rounded-xl text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer active:scale-95 shrink-0"
+                  title="Summarize with AI"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Summarize</span>
+                </button>
                 <MoreVertical className="w-5 h-5 text-slate-200" />
               </div>
             ))}
@@ -1012,7 +1066,7 @@ export default function ClassroomView({ classData, onBack, user }) {
               <ArrowLeft className="w-6 h-6" />
             </button>
             <div className="flex bg-white p-1.5 rounded-[1.5rem] border border-slate-100 shadow-sm overflow-x-auto">
-               {['Stream', 'Classwork', 'Discussion', 'People', 'Grades', 'Attendance'].map(tab => (
+               {['Stream', 'Classwork', 'Discussion', 'Whiteboard', 'People', 'Grades', 'Attendance'].map(tab => (
                  <button 
                   key={tab}
                   onClick={() => setActiveSubTab(tab)}
@@ -1043,6 +1097,7 @@ export default function ClassroomView({ classData, onBack, user }) {
                 {activeSubTab === 'Stream' && renderStream()}
                 {activeSubTab === 'Classwork' && renderClasswork()}
                 {activeSubTab === 'Discussion' && <Chat classId={classData._id} user={user} />}
+                {activeSubTab === 'Whiteboard' && <Whiteboard classId={classData._id} user={user} />}
                 {activeSubTab === 'People' && renderPeople()}
                 {activeSubTab === 'Grades' && renderGrades()}
                 {activeSubTab === 'Attendance' && renderAttendance()}
@@ -1353,6 +1408,112 @@ export default function ClassroomView({ classData, onBack, user }) {
                   )}
                 </div>
               </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* AI Summarizer Modal */}
+      <AnimatePresence>
+        {selectedSummaryMat && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-slate-900/40 backdrop-blur-md"
+              onClick={() => setSelectedSummaryMat(null)}
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-2xl relative z-10 overflow-hidden border border-slate-100 flex flex-col max-h-[85vh] text-slate-800 text-left"
+            >
+              {/* Header */}
+              <div className="p-8 border-b border-gray-50 flex justify-between items-center bg-slate-50/50">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 bg-gradient-to-tr from-teal-500 to-teal-600 rounded-xl text-white shadow-lg shadow-teal-500/20">
+                    <Sparkles className="w-5 h-5 animate-pulse" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-black text-slate-900">AI Study Guide</h3>
+                    <p className="text-[10px] font-black text-teal-600 uppercase tracking-widest mt-0.5">{selectedSummaryMat.title}</p>
+                  </div>
+                </div>
+                <button onClick={() => setSelectedSummaryMat(null)} className="p-2 hover:bg-slate-200/50 rounded-xl text-slate-400 transition-colors">
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              {/* Scrollable Content */}
+              <div className="p-8 overflow-y-auto space-y-8 flex-1 custom-scrollbar">
+                {isSummarizing && (
+                  <div className="flex flex-col items-center justify-center py-20 gap-4">
+                    <Loader2 className="w-10 h-10 animate-spin text-teal-600" />
+                    <p className="text-slate-400 font-black uppercase tracking-widest text-xs animate-pulse text-center">Analyzing Resource...</p>
+                  </div>
+                )}
+
+                {summaryError && (
+                  <div className="p-6 bg-rose-50 border border-rose-100 text-rose-600 rounded-2xl font-bold text-sm text-center">
+                    {summaryError}
+                  </div>
+                )}
+
+                {summaryData && (
+                  <>
+                    {/* Summary */}
+                    <div className="space-y-3">
+                      <h4 className="text-sm font-black text-slate-400 uppercase tracking-wider">Executive Summary</h4>
+                      <p className="text-slate-600 leading-relaxed font-medium text-sm sm:text-base bg-slate-50 p-6 rounded-3xl border border-slate-100">
+                        {summaryData.summary}
+                      </p>
+                    </div>
+
+                    {/* Key Takeaways */}
+                    <div className="space-y-3">
+                      <h4 className="text-sm font-black text-slate-400 uppercase tracking-wider">Key Takeaways</h4>
+                      <ul className="space-y-3">
+                        {summaryData.keyTakeaways?.map((point, idx) => (
+                          <li key={idx} className="flex gap-3 text-slate-600 text-sm font-medium">
+                            <span className="w-6 h-6 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center font-black text-xs shrink-0">{idx + 1}</span>
+                            <span className="leading-relaxed">{point}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {/* Flashcards */}
+                    {summaryData.flashcards?.length > 0 && (
+                      <div className="space-y-4">
+                        <h4 className="text-sm font-black text-slate-400 uppercase tracking-wider">Study Flashcards</h4>
+                        <div className="grid sm:grid-cols-2 gap-4">
+                          {summaryData.flashcards.map((card, idx) => {
+                            const isFlipped = !!flippedFlashcards[idx];
+                            return (
+                              <div 
+                                key={idx}
+                                onClick={() => setFlippedFlashcards(prev => ({ ...prev, [idx]: !isFlipped }))}
+                                className="h-44 bg-slate-50 border border-slate-100 p-6 rounded-3xl cursor-pointer hover:shadow-md transition-all flex flex-col justify-between text-center select-none"
+                              >
+                                <div className="flex justify-between items-center">
+                                  <span className="text-[9px] font-black uppercase tracking-wider text-slate-400">Card {idx + 1}</span>
+                                  <span className="text-[9px] font-black uppercase tracking-wider text-teal-600">{isFlipped ? 'Answer' : 'Question'}</span>
+                                </div>
+                                <div className="flex-1 flex items-center justify-center px-2 py-4">
+                                  <p className="text-sm font-bold text-slate-800 line-clamp-4">
+                                    {isFlipped ? card.answer : card.question}
+                                  </p>
+                                </div>
+                                <div className="text-[9px] font-black uppercase tracking-widest text-slate-300">Click to flip</div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
             </motion.div>
           </div>
         )}

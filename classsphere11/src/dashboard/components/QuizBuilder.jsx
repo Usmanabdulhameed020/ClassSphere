@@ -6,9 +6,12 @@ import {
   AlertCircle,
   Save,
   X,
-  Loader2
+  Loader2,
+  Sparkles
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import axios from 'axios';
+import API_BASE_URL from '../../config';
 
 export default function QuizBuilder({ onSave, onCancel }) {
   const [quiz, setQuiz] = useState({
@@ -20,6 +23,55 @@ export default function QuizBuilder({ onSave, onCancel }) {
   });
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
+
+  // AI Quiz Generator States
+  const [showAIPanel, setShowAIPanel] = useState(false);
+  const [aiTopic, setAiTopic] = useState('');
+  const [aiInstructions, setAiInstructions] = useState('');
+  const [aiNumQuestions, setAiNumQuestions] = useState(5);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [aiError, setAiError] = useState('');
+
+  const handleAIGenerate = async (e) => {
+    e.preventDefault();
+    if (!aiTopic.trim()) {
+      setAiError('Please enter a quiz topic.');
+      return;
+    }
+    setIsGenerating(true);
+    setAiError('');
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.post(`${API_BASE_URL}/api/ai/generate-quiz`, {
+        topic: aiTopic,
+        instructions: aiInstructions,
+        numQuestions: aiNumQuestions
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (res.data.success && Array.isArray(res.data.questions)) {
+        setQuiz({
+          title: aiTopic,
+          instructions: aiInstructions || `AI-Generated Quiz on ${aiTopic}`,
+          questions: res.data.questions.map(q => ({
+            question: q.question || '',
+            options: Array.isArray(q.options) ? q.options : ['', '', '', ''],
+            correctAnswer: typeof q.correctAnswer === 'number' ? q.correctAnswer : 0,
+            points: typeof q.points === 'number' ? q.points : 5
+          }))
+        });
+        setShowAIPanel(false);
+      } else {
+        setAiError('Failed to format generated quiz questions. Please try again.');
+      }
+    } catch (err) {
+      console.error(err);
+      setAiError(err.response?.data?.message || 'Error generating quiz. Please check network/credentials.');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   const addQuestion = () => {
     setQuiz({
@@ -73,10 +125,102 @@ export default function QuizBuilder({ onSave, onCancel }) {
           <h2 className="text-3xl font-black text-slate-900 tracking-tight">Quiz Architect</h2>
           <p className="text-slate-500 font-medium mt-1">Design an interactive assessment</p>
         </div>
-        <button onClick={onCancel} className="p-3 hover:bg-slate-50 rounded-2xl transition-colors">
-          <X className="w-6 h-6 text-slate-400" />
-        </button>
+        <div className="flex items-center gap-3">
+          <button 
+            type="button"
+            onClick={() => setShowAIPanel(!showAIPanel)}
+            className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white font-black text-xs uppercase tracking-wider rounded-2xl shadow-md transition-all active:scale-95"
+          >
+            <Sparkles className="w-4 h-4 animate-pulse" />
+            <span>AI Quiz Generator</span>
+          </button>
+          <button onClick={onCancel} className="p-3 hover:bg-slate-50 rounded-2xl transition-colors">
+            <X className="w-6 h-6 text-slate-400" />
+          </button>
+        </div>
       </div>
+
+      {showAIPanel && (
+        <div className="mb-10 bg-gradient-to-br from-teal-50/50 to-indigo-50/50 border border-teal-100 rounded-[2.5rem] p-8 space-y-6">
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-black text-slate-800 flex items-center gap-2">
+              <Sparkles className="text-teal-600 w-5 h-5 animate-pulse" /> Generate Quiz with AI
+            </h3>
+            <button 
+              type="button" 
+              onClick={() => setShowAIPanel(false)} 
+              className="p-1 hover:bg-slate-200/50 rounded-lg transition-colors text-slate-400"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="space-y-4">
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="space-y-2 text-left">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Quiz Topic</label>
+                <input 
+                  type="text" 
+                  value={aiTopic}
+                  onChange={(e) => setAiTopic(e.target.value)}
+                  placeholder="e.g. Photosynthesis, Introduction to Javascript..."
+                  className="w-full bg-white border border-slate-200 focus:border-teal-500 rounded-2xl py-4 px-6 font-bold outline-none transition-all text-sm text-slate-800"
+                />
+              </div>
+              <div className="space-y-2 text-left">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Number of Questions</label>
+                <input 
+                  type="number" 
+                  min="1" max="20"
+                  value={aiNumQuestions}
+                  onChange={(e) => setAiNumQuestions(parseInt(e.target.value) || 5)}
+                  className="w-full bg-white border border-slate-200 focus:border-teal-500 rounded-2xl py-4 px-6 font-bold outline-none transition-all text-sm text-slate-800"
+                />
+              </div>
+            </div>
+            <div className="space-y-2 text-left">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Additional Instructions (Optional)</label>
+              <textarea 
+                value={aiInstructions}
+                onChange={(e) => setAiInstructions(e.target.value)}
+                placeholder="e.g. Focus on light reactions, keep questions beginner-level..."
+                className="w-full bg-white border border-slate-200 focus:border-teal-500 rounded-2xl py-4 px-6 font-bold outline-none transition-all text-sm min-h-[80px] text-slate-800"
+              />
+            </div>
+            {aiError && (
+              <div className="text-xs font-bold text-rose-600 bg-rose-50 border border-rose-100 p-4 rounded-xl text-left">
+                {aiError}
+              </div>
+            )}
+            <div className="flex justify-end gap-3 pt-2">
+              <button 
+                type="button"
+                onClick={() => setShowAIPanel(false)}
+                className="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-2xl transition-colors text-sm"
+              >
+                Cancel
+              </button>
+              <button 
+                type="button"
+                disabled={isGenerating || !aiTopic.trim()}
+                onClick={handleAIGenerate}
+                className="px-8 py-3 bg-teal-600 hover:bg-teal-700 text-white font-black rounded-2xl transition-all text-sm shadow-lg shadow-teal-100 flex items-center gap-2 disabled:opacity-50"
+              >
+                {isGenerating ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Architecting Quiz...</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4 text-teal-200" />
+                    <span>Generate Quiz</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-10">
         <div className="space-y-6">

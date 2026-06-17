@@ -191,4 +191,141 @@ ${message}
   }
 });
 
+// AI Quiz Generator Endpoint
+router.post('/generate-quiz', auth, async (req, res) => {
+  const { topic, instructions, numQuestions } = req.body;
+  const count = numQuestions || 5;
+
+  try {
+    const apiKey = process.env.GEMINI_API_KEY;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+
+    const systemPrompt = `
+You are an expert academic assessment tool. Generate a multiple-choice quiz about the following topic.
+Topic: ${topic}
+Additional Instructions: ${instructions || "None"}
+Number of Questions: ${count}
+
+You must return a valid JSON array of questions. Every question must match the following JSON schema:
+{
+  "question": "The text of the question?",
+  "options": ["Option 0", "Option 1", "Option 2", "Option 3"],
+  "correctAnswer": 0, // The 0-based index of the correct option in the options array
+  "points": 1 // Weight of the question (integer, default 1)
+}
+
+Do not include any other wrapping text, markdown formatting blocks, or explanation. Only return the JSON array of questions.
+`;
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [
+          {
+            role: "user",
+            parts: [{ text: systemPrompt }]
+          }
+        ],
+        generationConfig: {
+          responseMimeType: "application/json",
+          temperature: 0.7,
+          maxOutputTokens: 4096
+        }
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Gemini API error: ${response.statusText}`);
+    }
+
+    const resData = await response.json();
+    const replyText = resData?.candidates?.[0]?.content?.parts?.[0]?.text;
+    const questions = JSON.parse(replyText);
+
+    res.json({
+      success: true,
+      questions
+    });
+  } catch (error) {
+    console.error("AI Quiz Generator Error:", error);
+    res.status(500).json({ message: "Failed to generate quiz questions via AI." });
+  }
+});
+
+// AI Material Summarizer Endpoint
+router.post('/summarize-material', auth, async (req, res) => {
+  const { materialId } = req.body;
+
+  try {
+    const material = await Material.findById(materialId);
+    if (!material) {
+      return res.status(404).json({ message: 'Material not found' });
+    }
+
+    const apiKey = process.env.GEMINI_API_KEY;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+
+    const systemPrompt = `
+You are an advanced academic study assistant. Analyze this study material and generate a summary, key takeaways, and flashcards for study.
+Material Title: ${material.title}
+Material Topic: ${material.topic || "General"}
+Material Description: ${material.description || "No description provided."}
+
+Return a valid JSON object matching the following structure:
+{
+  "summary": "A cohesive 1-2 paragraph study summary of the material.",
+  "keyTakeaways": [
+    "First main takeaway point.",
+    "Second main takeaway point.",
+    "Third main takeaway point."
+  ],
+  "flashcards": [
+    {
+      "question": "A concise question testing the material?",
+      "answer": "The correct answer to this flashcard question."
+    }
+  ]
+}
+
+Ensure the flashcards have at least 3-4 high-value study cards.
+Only return the JSON object. Do not include markdown codeblocks or wrapper formatting.
+`;
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [
+          {
+            role: "user",
+            parts: [{ text: systemPrompt }]
+          }
+        ],
+        generationConfig: {
+          responseMimeType: "application/json",
+          temperature: 0.7,
+          maxOutputTokens: 4096
+        }
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Gemini API error: ${response.statusText}`);
+    }
+
+    const resData = await response.json();
+    const replyText = resData?.candidates?.[0]?.content?.parts?.[0]?.text;
+    const summaryData = JSON.parse(replyText);
+
+    res.json({
+      success: true,
+      ...summaryData
+    });
+  } catch (error) {
+    console.error("AI Material Summarizer Error:", error);
+    res.status(500).json({ message: "Failed to summarize study material." });
+  }
+});
+
 module.exports = router;

@@ -17,7 +17,7 @@ const MessageSchema = new mongoose.Schema({
   senderProfilePicture: String,
   content: {
     type: String,
-    required: true
+    required: false
   },
   type: {
     type: String,
@@ -28,6 +28,11 @@ const MessageSchema = new mongoose.Schema({
     name: String,
     url: String,
     fileType: String
+  }],
+  readBy: [{
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    username: String,
+    readAt: { type: Date, default: Date.now }
   }],
   createdAt: {
     type: Date,
