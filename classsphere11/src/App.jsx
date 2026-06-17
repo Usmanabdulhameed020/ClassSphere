@@ -37,6 +37,8 @@ import Dashboard from './dashboard/Dashboard'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 import Terms from './pages/Terms'
 
+import GlobalAlertModal from './components/GlobalAlertModal'
+
 const AppContent = () => {
   const location = useLocation();
   const hideNavAndFooter = ['/dashboard', '/login', '/signup', '/select-role'].includes(location.pathname);
@@ -95,6 +97,7 @@ const App = () => {
       <Router>
         <AppContent />
       </Router>
+      <GlobalAlertModal />
     </div>
   )
 }
