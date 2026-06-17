@@ -36,7 +36,7 @@ export default function Dashboard() {
     try {
       const token = localStorage.getItem('token');
       if (!token) return;
-      const res = await axios.get('/api/messages/conversations', {
+      const res = await axios.get(`${API_BASE_URL}/api/messages/conversations`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const totalUnread = res.data.reduce((acc, conv) => acc + (conv.unreadCount || 0), 0);

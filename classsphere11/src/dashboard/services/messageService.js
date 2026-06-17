@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { getSocket } from '../utils/socketManager';
+import API_BASE_URL from '../../config';
 
-const API_URL = '/api/messages';
+const API_URL = `${API_BASE_URL}/api/messages`;
 
 const getAuthHeader = () => {
   const token = localStorage.getItem('token');
