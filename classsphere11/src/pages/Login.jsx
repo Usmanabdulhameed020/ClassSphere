@@ -25,15 +25,20 @@ export default function Login() {
         if (buttonContainer && buttonContainer.children.length === 0) {
           window.google.accounts.id.initialize({
             client_id: googleClientId,
-            ux_mode: 'redirect',
-            login_uri: `${window.location.origin}/login`,
+            ux_mode: 'popup',
             callback: (response) => {
               handleGoogleLoginSubmit(response.credential);
             }
           });
           window.google.accounts.id.renderButton(
             buttonContainer,
-            { theme: "outline", size: "large", width: 380, text: "continue_with" }
+            { 
+              theme: "outline", 
+              size: "large", 
+              width: buttonContainer.clientWidth || 320, 
+              text: "continue_with",
+              shape: "pill"
+            }
           );
         }
       } catch (err) {
@@ -129,17 +134,17 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-6 pt-32">
-      <div className="w-full max-w-md space-y-8">
+    <div className="min-h-screen bg-white flex items-center justify-center p-4 sm:p-6 pt-16 sm:pt-24 md:pt-32">
+      <div className="w-full max-w-md space-y-4 sm:space-y-8">
         {/* Header */}
-        <div className="text-center space-y-4">
+        <div className="text-center space-y-2 sm:space-y-4">
           <motion.div
             key={mode}
             initial={{ scale: 0.5, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="w-20 h-20 bg-teal-600 rounded-3xl flex items-center justify-center mx-auto shadow-xl shadow-teal-100"
+            className="w-14 h-14 sm:w-20 sm:h-20 bg-teal-600 rounded-2xl sm:rounded-3xl flex items-center justify-center mx-auto shadow-xl shadow-teal-100"
           >
-            {mode === 'login' ? <UserCircle className="text-white w-12 h-12" /> : <Key className="text-white w-12 h-12" />}
+            {mode === 'login' ? <UserCircle className="text-white w-8 h-8 sm:w-12 sm:h-12" /> : <Key className="text-white w-8 h-8 sm:w-12 sm:h-12" />}
           </motion.div>
           
           <AnimatePresence mode="wait">
@@ -149,10 +154,10 @@ export default function Login() {
                 initial={{ y: 10, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: -10, opacity: 0 }}
-                className="space-y-2"
+                className="space-y-1"
               >
-                <h2 className="text-4xl font-black text-slate-900 tracking-tight">Welcome Back.</h2>
-                <p className="text-slate-500 font-light text-lg">Sign in to continue your learning journey.</p>
+                <h2 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight">Welcome Back.</h2>
+                <p className="text-slate-500 font-light text-sm sm:text-lg">Sign in to continue your learning journey.</p>
               </motion.div>
             )}
             {mode === 'forgot' && (
@@ -161,10 +166,10 @@ export default function Login() {
                 initial={{ y: 10, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: -10, opacity: 0 }}
-                className="space-y-2"
+                className="space-y-1"
               >
-                <h2 className="text-4xl font-black text-slate-900 tracking-tight">Forgot Password?</h2>
-                <p className="text-slate-500 font-light text-lg">No worries! Enter your email to receive a code.</p>
+                <h2 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight">Forgot Password?</h2>
+                <p className="text-slate-500 font-light text-sm sm:text-lg">No worries! Enter your email to receive a code.</p>
               </motion.div>
             )}
             {mode === 'reset' && (
@@ -173,10 +178,10 @@ export default function Login() {
                 initial={{ y: 10, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: -10, opacity: 0 }}
-                className="space-y-2"
+                className="space-y-1"
               >
-                <h2 className="text-4xl font-black text-slate-900 tracking-tight">Reset Password.</h2>
-                <p className="text-slate-500 font-light text-lg">Enter the code sent to your email and your new password.</p>
+                <h2 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight">Reset Password.</h2>
+                <p className="text-slate-500 font-light text-sm sm:text-lg">Enter code and new password.</p>
               </motion.div>
             )}
           </AnimatePresence>
@@ -187,7 +192,7 @@ export default function Login() {
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.3 }}
-          className="bg-slate-50 p-8 md:p-10 rounded-[40px] border border-slate-100 space-y-6 shadow-sm"
+          className="bg-slate-50 p-6 sm:p-10 rounded-[30px] sm:rounded-[40px] border border-slate-100 space-y-4 sm:space-y-6 shadow-sm"
         >
           {error && (
             <div className="bg-red-50 text-red-600 p-4 rounded-2xl text-sm font-medium border border-red-100">

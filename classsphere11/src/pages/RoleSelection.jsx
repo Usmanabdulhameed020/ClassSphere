@@ -55,14 +55,14 @@ export default function RoleSelection() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-6 pt-32">
-      <div className="w-full max-w-5xl space-y-12">
+    <div className="min-h-screen bg-white flex items-center justify-center p-4 sm:p-6 pt-24 sm:pt-32">
+      <div className="w-full max-w-5xl space-y-8 sm:space-y-12">
         {/* Header */}
-        <div className="text-center space-y-4">
+        <div className="text-center space-y-2 sm:space-y-4">
           <motion.h2
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            className="text-5xl font-black text-slate-900 tracking-tight"
+            className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight"
           >
             Join ClassSphere.
           </motion.h2>
@@ -70,14 +70,14 @@ export default function RoleSelection() {
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.1 }}
-            className="text-slate-500 font-light text-xl max-w-2xl mx-auto"
+            className="text-slate-500 font-light text-base sm:text-xl max-w-2xl mx-auto"
           >
             Select your role to get started with a tailored experience designed for your needs.
           </motion.p>
         </div>
 
         {/* Role Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
           {roles.map((role, index) => (
             <motion.button
               key={role.id}
@@ -85,18 +85,18 @@ export default function RoleSelection() {
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.2 + index * 0.1 }}
               onClick={() => handleRoleSelect(role.id)}
-              className="group bg-slate-50 p-8 rounded-[40px] border border-slate-100 text-left hover:bg-white hover:shadow-2xl hover:shadow-slate-200 transition-all duration-500 hover:-translate-y-2 flex flex-col h-full"
+              className="group bg-slate-50 p-6 sm:p-8 rounded-[30px] sm:rounded-[40px] border border-slate-100 text-left hover:bg-white hover:shadow-2xl hover:shadow-slate-200 transition-all duration-500 hover:-translate-y-2 flex flex-col h-full"
             >
-              <div className={`w-20 h-20 rounded-3xl ${role.color} flex items-center justify-center mb-8 shadow-sm group-hover:scale-110 transition-transform duration-500`}>
-                {role.icon}
+              <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl ${role.color} flex items-center justify-center mb-6 sm:mb-8 shadow-sm group-hover:scale-110 transition-transform duration-500`}>
+                <div className="scale-75 sm:scale-100">{role.icon}</div>
               </div>
-              <div className="space-y-4 flex-grow">
-                <h3 className="text-2xl font-black text-slate-900 uppercase tracking-tight">{role.title}</h3>
-                <p className="text-slate-500 font-medium leading-relaxed">
+              <div className="space-y-3 sm:space-y-4 flex-grow">
+                <h3 className="text-xl sm:text-2xl font-black text-slate-900 uppercase tracking-tight">{role.title}</h3>
+                <p className="text-sm sm:text-base text-slate-500 font-medium leading-relaxed">
                   {role.desc}
                 </p>
               </div>
-              <div className="mt-8 flex items-center gap-2 text-teal-600 font-bold group-hover:gap-4 transition-all uppercase tracking-widest text-sm">
+              <div className="mt-6 sm:mt-8 flex items-center gap-2 text-teal-600 font-bold group-hover:gap-4 transition-all uppercase tracking-widest text-xs sm:text-sm">
                 Get Started <ArrowRight className="w-5 h-5" />
               </div>
             </motion.button>

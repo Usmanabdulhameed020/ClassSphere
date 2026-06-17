@@ -55,8 +55,10 @@ function renderMarkdown(text) {
   });
 }
 
-export default function AIAssistant({ classId }) {
-  const [isOpen, setIsOpen] = useState(false);
+export default function AIAssistant({ classId, isOpen: propIsOpen, setIsOpen: propSetIsOpen }) {
+  const [localIsOpen, setLocalIsOpen] = useState(false);
+  const isOpen = propIsOpen !== undefined ? propIsOpen : localIsOpen;
+  const setIsOpen = propSetIsOpen !== undefined ? propSetIsOpen : setLocalIsOpen;
   const [isMinimized, setIsMinimized] = useState(false);
   const [messages, setMessages] = useState([
     { role: 'assistant', content: 'Hello! I am ClassSphere AI. How can I help you with your studies today?' }
@@ -91,26 +93,26 @@ export default function AIAssistant({ classId }) {
   };
 
   return (
-    <div className="fixed bottom-8 right-8 z-[200] flex flex-col items-end">
+    <div className="fixed bottom-20 right-4 lg:bottom-8 lg:right-8 z-[200] flex flex-col items-end">
       <AnimatePresence>
         {isOpen && (
           <motion.div 
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className={`bg-white rounded-[2.5rem] shadow-2xl border border-slate-100 flex flex-col overflow-hidden mb-4 transition-all duration-300 ${
-              isMinimized ? 'h-20 w-80' : 'h-[500px] w-[400px]'
+            className={`bg-white rounded-[2rem] sm:rounded-[2.5rem] shadow-2xl border border-slate-100 flex flex-col overflow-hidden mb-4 transition-all duration-300 ${
+              isMinimized ? 'h-16 w-64 sm:w-80' : 'h-[450px] max-h-[calc(100dvh-120px)] sm:h-[500px] sm:max-h-[80vh] w-[calc(100vw-2rem)] sm:w-[400px]'
             }`}
           >
             {/* Header */}
-            <div className="p-6 bg-slate-900 text-white flex justify-between items-center shrink-0">
+            <div className="p-4 sm:p-6 bg-slate-900 text-white flex justify-between items-center shrink-0">
                <div className="flex items-center gap-3">
                  <div className="p-2 bg-teal-500 rounded-xl shadow-lg shadow-teal-500/20">
-                    <Sparkles className="w-5 h-5" />
+                    <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
                  </div>
                  <div>
-                   <h3 className="font-black text-sm tracking-tight">ClassSphere AI</h3>
-                   <p className="text-[10px] text-teal-400 font-bold uppercase tracking-widest">Active & Ready</p>
+                   <h3 className="font-black text-xs sm:text-sm tracking-tight">ClassSphere AI</h3>
+                   <p className="text-[8px] sm:text-[10px] text-teal-400 font-bold uppercase tracking-widest">Active & Ready</p>
                  </div>
                </div>
                <div className="flex items-center gap-2">
@@ -185,7 +187,7 @@ export default function AIAssistant({ classId }) {
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(!isOpen)}
-        className="w-16 h-16 bg-slate-900 text-white rounded-3xl shadow-2xl flex items-center justify-center relative overflow-hidden group border-2 border-teal-500/20"
+        className="hidden lg:flex w-16 h-16 bg-slate-900 text-white rounded-3xl shadow-2xl items-center justify-center relative overflow-hidden group border-2 border-teal-500/20"
       >
         <div className="absolute inset-0 bg-gradient-to-tr from-teal-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
         {isOpen ? <X className="w-8 h-8" /> : <Bot className="w-8 h-8 text-teal-400" />}

@@ -343,19 +343,19 @@ export default function ClassroomView({ classData, onBack, user }) {
     <div className="space-y-6">
       {/* Banner */}
       <div className={cn(
-        "h-48 rounded-[2rem] p-10 relative overflow-hidden shadow-xl shadow-teal-100/20 bg-gradient-to-br",
+        "h-32 sm:h-48 rounded-2xl sm:rounded-[2rem] p-6 sm:p-10 relative overflow-hidden shadow-xl shadow-teal-100/20 bg-gradient-to-br",
         classData.color || 'from-teal-600 to-teal-400'
       )}>
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl" />
         <div className="relative z-10 flex flex-col justify-end h-full">
-          <h1 className="text-4xl font-black text-white tracking-tight">{classData.name}</h1>
-          <p className="text-white/80 font-bold mt-2 text-lg">{classData.section || 'General'}</p>
+          <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight">{classData.name}</h1>
+          <p className="text-white/80 font-bold mt-1 sm:mt-2 text-sm sm:text-lg">{classData.section || 'General'}</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 sm:gap-8">
         {/* Left Info Panel */}
-        <div className="lg:col-span-1 space-y-6">
+        <div className="lg:col-span-1 space-y-6 order-2 lg:order-1">
           <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
             <h3 className="text-xs font-black text-slate-300 uppercase tracking-widest mb-4">Class Code</h3>
             <div className="flex items-center justify-between">
@@ -385,26 +385,26 @@ export default function ClassroomView({ classData, onBack, user }) {
         </div>
 
         {/* Right Stream Panel */}
-        <div className="lg:col-span-3 space-y-6">
+        <div className="lg:col-span-3 space-y-6 order-1 lg:order-2">
           {/* Post Box */}
-          <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+          <div className="bg-white p-5 sm:p-6 rounded-2xl sm:rounded-[2rem] border border-slate-100 shadow-sm">
             <form onSubmit={handlePostAnnouncement}>
               <div className="flex gap-4">
-                <div className="w-12 h-12 bg-slate-900 rounded-2xl shrink-0 flex items-center justify-center text-white font-black">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-slate-900 rounded-xl sm:rounded-2xl shrink-0 flex items-center justify-center text-white font-black">
                   {user?.username?.charAt(0)}
                 </div>
                 <textarea 
                   value={newAnnouncement}
                   onChange={(e) => setNewAnnouncement(e.target.value)}
                   placeholder="Announce something to your class..."
-                  className="w-full bg-slate-50 border-2 border-transparent focus:border-teal-500 focus:bg-white rounded-2xl py-4 px-6 font-bold outline-none transition-all resize-none min-h-[100px]"
+                  className="w-full bg-slate-50 border-2 border-transparent focus:border-teal-500 focus:bg-white rounded-xl sm:rounded-2xl py-3 sm:py-4 px-4 sm:px-6 font-bold outline-none transition-all resize-none min-h-[80px] sm:min-h-[100px] text-sm sm:text-base"
                 />
               </div>
-              <div className="flex justify-between items-center mt-4 pl-16">
+              <div className="flex justify-between items-center mt-4 pl-14 sm:pl-16">
                  <button type="button" className="p-2 text-slate-400 hover:text-teal-600 transition-colors"><Paperclip className="w-5 h-5" /></button>
                  <button 
                   disabled={isPosting || !newAnnouncement.trim()}
-                  className="bg-teal-600 text-white px-8 py-3 rounded-xl font-black text-sm shadow-xl shadow-teal-100 hover:bg-teal-700 disabled:opacity-50 transition-all flex items-center gap-2"
+                  className="bg-teal-600 text-white px-6 sm:px-8 py-2.5 sm:py-3 rounded-xl font-black text-xs sm:text-sm shadow-xl shadow-teal-100 hover:bg-teal-700 disabled:opacity-50 transition-all flex items-center gap-2"
                  >
                    {isPosting ? 'Posting...' : 'Post'}
                    <Send className="w-4 h-4" />
@@ -416,14 +416,14 @@ export default function ClassroomView({ classData, onBack, user }) {
           {/* Announcements List */}
           <div className="space-y-6">
             {announcements.map((ann) => (
-              <div key={ann._id} className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
-                <div className="p-6 flex justify-between items-start">
+              <div key={ann._id} className="bg-white rounded-2xl sm:rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
+                <div className="p-5 sm:p-6 flex justify-between items-start">
                   <div className="flex gap-4">
                     <div className="w-10 h-10 bg-teal-50 rounded-xl flex items-center justify-center text-teal-600 font-black">
                       {ann.author?.username?.charAt(0)}
                     </div>
                     <div>
-                      <h4 className="font-black text-slate-900 leading-none">{ann.author?.username}</h4>
+                      <h4 className="font-black text-slate-900 leading-none text-sm sm:text-base">{ann.author?.username}</h4>
                       <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase tracking-widest">
                         {new Date(ann.createdAt).toLocaleDateString()}
                       </p>
@@ -431,13 +431,13 @@ export default function ClassroomView({ classData, onBack, user }) {
                   </div>
                   <button className="p-2 hover:bg-slate-50 rounded-xl transition-colors"><MoreVertical className="w-5 h-5 text-slate-300" /></button>
                 </div>
-                <div className="px-6 pb-6 border-b border-slate-50">
-                  <p className="text-slate-600 font-medium whitespace-pre-wrap">{ann.content}</p>
+                <div className="px-5 sm:px-6 pb-5 sm:pb-6 border-b border-slate-50">
+                  <p className="text-slate-600 font-medium whitespace-pre-wrap text-sm sm:text-base">{ann.content}</p>
                 </div>
                 
                 {/* Comments Section */}
                 {ann.comments?.length > 0 && (
-                  <div className="px-6 py-4 space-y-4 bg-slate-50/30">
+                  <div className="px-5 sm:px-6 py-4 space-y-4 bg-slate-50/30">
                     {ann.comments.map((comment, idx) => (
                       <div key={idx} className="flex gap-3">
                         <div className="w-8 h-8 bg-white border border-slate-100 rounded-lg flex items-center justify-center text-[10px] font-black text-slate-400">
@@ -478,7 +478,7 @@ export default function ClassroomView({ classData, onBack, user }) {
               </div>
             ))}
             {announcements.length === 0 && !isLoading && (
-               <div className="text-center py-20 bg-white rounded-[2rem] border border-slate-100 border-dashed">
+               <div className="text-center py-20 bg-white rounded-2xl sm:rounded-[2rem] border border-slate-100 border-dashed">
                   <p className="text-slate-400 font-medium">No announcements yet.</p>
                </div>
             )}

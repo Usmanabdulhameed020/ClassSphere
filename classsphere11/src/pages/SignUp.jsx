@@ -30,15 +30,20 @@ export default function SignUp() {
         if (buttonContainer && buttonContainer.children.length === 0) {
           window.google.accounts.id.initialize({
             client_id: googleClientId,
-            ux_mode: 'redirect',
-            login_uri: `${window.location.origin}/signup`,
+            ux_mode: 'popup',
             callback: (response) => {
               handleGoogleLoginSubmit(response.credential);
             }
           });
           window.google.accounts.id.renderButton(
             buttonContainer,
-            { theme: "outline", size: "large", width: 1000, text: "signup_with" }
+            { 
+              theme: "outline", 
+              size: "large", 
+              width: buttonContainer.clientWidth || 320, 
+              text: "signup_with",
+              shape: "pill"
+            }
           );
         }
       } catch (err) {
@@ -149,23 +154,23 @@ export default function SignUp() {
   const config = getRoleConfig();
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-6 pt-32">
-      <div className="w-full max-w-3xl space-y-8">
+    <div className="min-h-screen bg-white flex items-center justify-center p-4 sm:p-6 pt-24 md:pt-32">
+      <div className="w-full max-w-3xl space-y-6 sm:space-y-8">
         {/* Header */}
-        <div className="text-center space-y-4">
+        <div className="text-center space-y-3 sm:space-y-4">
           <motion.div
             initial={{ scale: 0.5, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="w-24 h-24 rounded-[32px] bg-teal-600 flex items-center justify-center mx-auto mb-6 shadow-xl shadow-teal-100"
+            className="w-16 h-16 sm:w-24 sm:h-24 rounded-2xl sm:rounded-[32px] bg-teal-600 flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-xl shadow-teal-100"
           >
-            <div className="text-white">
+            <div className="text-white scale-75 sm:scale-100">
               {config.icon}
             </div>
           </motion.div>
           <motion.h2
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            className="text-5xl font-black text-slate-900 tracking-tight"
+            className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight"
           >
             {config.title}
           </motion.h2>
@@ -173,7 +178,7 @@ export default function SignUp() {
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.1 }}
-            className="text-slate-500 font-light text-xl"
+            className="text-slate-500 font-light text-base sm:text-xl"
           >
             {config.subtitle}
           </motion.p>
@@ -185,7 +190,7 @@ export default function SignUp() {
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.2 }}
           onSubmit={handleSignUp}
-          className="bg-slate-50 p-8 md:p-12 rounded-[50px] border border-slate-100 space-y-8 shadow-sm"
+          className="bg-slate-50 p-6 sm:p-8 md:p-12 rounded-[30px] sm:rounded-[50px] border border-slate-100 space-y-6 sm:space-y-8 shadow-sm"
         >
           {error && (
             <div className="bg-red-50 text-red-600 p-4 rounded-2xl text-sm font-medium border border-red-100">

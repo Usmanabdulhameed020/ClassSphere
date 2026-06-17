@@ -9,9 +9,10 @@ import API_BASE_URL from '../config';
 import { ThemeProvider } from './context/ThemeContext';
 import AIAssistant from './components/AIAssistant';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, X, Loader2 } from 'lucide-react';
+import { Plus, X, Loader2, Home, MessageSquare, CheckSquare, Calendar, Sparkles, Menu } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { getSocket } from './utils/socketManager';
+import { cn } from './utils';
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('Home');
@@ -29,6 +30,7 @@ export default function Dashboard() {
   const [newClassData, setNewClassData] = useState({ name: '', section: '', subject: '' });
   const [isActionLoading, setIsActionLoading] = useState(false);
   const [showRoleModal, setShowRoleModal] = useState(false);
+  const [isAIOpen, setIsAIOpen] = useState(false);
   const navigate = useNavigate();
 
   const fetchUnreadCount = async () => {
@@ -61,7 +63,7 @@ export default function Dashboard() {
   }, []);
 
   useEffect(() => {
-    if (window.innerWidth < 768) {
+    if (window.innerWidth < 1024) {
       setIsSidebarOpen(false);
     }
     const storedUser = localStorage.getItem('user');
@@ -199,7 +201,7 @@ export default function Dashboard() {
 
   return (
     <ThemeProvider>
-    <div className="flex flex-col h-screen bg-[#fcfdfe] overflow-hidden font-sans selection:bg-teal-100 selection:text-teal-900">
+    <div className="flex flex-col h-dvh bg-[#fcfdfe] overflow-hidden font-sans selection:bg-teal-100 selection:text-teal-900">
       <TopNavbar 
         onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} 
         user={user} 
@@ -231,7 +233,7 @@ export default function Dashboard() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-30 md:hidden top-16"
+              className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-30 lg:hidden top-16"
               onClick={() => setIsSidebarOpen(false)}
             />
           )}
@@ -243,19 +245,19 @@ export default function Dashboard() {
           onTabChange={(tab) => {
             setActiveTab(tab);
             setSelectedClass(null);
-            if (window.innerWidth < 768) setIsSidebarOpen(false);
+            if (window.innerWidth < 1024) setIsSidebarOpen(false);
           }}
           classes={classes}
           onSelectClass={(cls) => {
             setSelectedClass(cls);
             setActiveTab('Classroom');
-            if (window.innerWidth < 768) setIsSidebarOpen(false);
+            if (window.innerWidth < 1024) setIsSidebarOpen(false);
           }}
           user={user}
           unreadMessagesCount={unreadMessagesCount}
         />
         
-        <main className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar relative">
+        <main className="flex-1 overflow-y-auto p-4 pb-24 lg:pb-8 lg:p-8 custom-scrollbar relative">
           <DashboardRenderer 
             activeTab={activeTab}
             selectedClass={selectedClass}
@@ -431,7 +433,34 @@ export default function Dashboard() {
         )}
       </AnimatePresence>
 
-      <AIAssistant classId={selectedClass?._id} />
+      {/* Mobile Bottom Navigation Bar */}
+      <div className="fixed bottom-0 left-0 right-0 h-16 bg-white/95 backdrop-blur-md border-t border-slate-100/80 px-5 flex items-center justify-center lg:hidden z-20 shadow-[0_-8px_30px_rgb(0,0,0,0.04)]">
+        {/* AI Assistant Button */}
+        <button
+          onClick={() => setIsAIOpen(!isAIOpen)}
+          className={cn(
+            "flex items-center gap-2 px-6 py-2.5 rounded-2xl transition-all duration-300 font-black text-xs active:scale-95 relative overflow-hidden shadow-lg w-full max-w-[220px] justify-center",
+            isAIOpen 
+              ? "bg-slate-900 text-white shadow-slate-900/20" 
+              : "bg-gradient-to-r from-teal-500 to-teal-600 text-white shadow-teal-500/20 hover:shadow-teal-500/30"
+          )}
+        >
+          {isAIOpen ? (
+            <>
+              <X className="w-4 h-4" />
+              <span>Close AI</span>
+            </>
+          ) : (
+            <>
+              <Sparkles className="w-4 h-4 text-teal-200 animate-pulse" />
+              <span>Ask AI</span>
+            </>
+          )}
+          <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-teal-300 rounded-full border border-white" />
+        </button>
+      </div>
+
+      <AIAssistant classId={selectedClass?._id} isOpen={isAIOpen} setIsOpen={setIsAIOpen} />
     </div>
     </ThemeProvider>
   );

@@ -16,6 +16,28 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      console.log("Searching for:", searchQuery);
+      // We'll simulate finding results
+      const results = navLinks.filter(link => 
+        link.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      if (results.length > 0) {
+        // Redirect to the first match for simplicity in this demo
+        window.location.href = results[0].href;
+      } else {
+        alert("No results found for: " + searchQuery);
+      }
+      setIsSearchOpen(false);
+      setSearchQuery("");
+    }
+  };
+
   const navLinks = [
     { name: "About", href: "/about" },
     { name: "Services", href: "/services" },
@@ -55,42 +77,67 @@ export default function Navbar() {
 
         {/* Desktop Nav Links */}
         <div className="hidden lg:flex items-center gap-8 xl:gap-10">
-          {navLinks.map((link) => (
-            <motion.div
-              key={link.name}
-              whileHover={{ y: -2 }}
-              whileTap={{ y: 0 }}
-            >
-              <Link
-                to={link.href}
-                className="text-sm font-semibold text-slate-600 hover:text-teal-600 transition-colors relative group"
+          <AnimatePresence mode="wait">
+            {!isSearchOpen ? (
+              <motion.div 
+                key="links"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="flex items-center gap-8 xl:gap-10"
               >
-                {link.name}
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-teal-600 transition-all duration-300 group-hover:w-full" />
-              </Link>
-            </motion.div>
-          ))}
+                {navLinks.map((link) => (
+                  <motion.div
+                    key={link.name}
+                    whileHover={{ y: -2 }}
+                    whileTap={{ y: 0 }}
+                  >
+                    <Link
+                      to={link.href}
+                      className="text-sm font-semibold text-slate-600 hover:text-teal-600 transition-colors relative group"
+                    >
+                      {link.name}
+                      <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-teal-600 transition-all duration-300 group-hover:w-full" />
+                    </Link>
+                  </motion.div>
+                ))}
+              </motion.div>
+            ) : (
+              <motion.form
+                key="search"
+                initial={{ opacity: 0, width: 0 }}
+                animate={{ opacity: 1, width: "300px" }}
+                exit={{ opacity: 0, width: 0 }}
+                onSubmit={handleSearch}
+                className="relative"
+              >
+                <input
+                  autoFocus
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search for spheres, services..."
+                  className="w-full bg-slate-100 border-none rounded-full px-5 py-2 text-sm focus:ring-2 focus:ring-teal-500 outline-none transition-all"
+                />
+                <button type="button" onClick={() => setIsSearchOpen(false)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                  <X className="w-4 h-4" />
+                </button>
+              </motion.form>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Actions */}
         <div className="flex items-center gap-2 sm:gap-4">
-          <div className="hidden sm:flex items-center gap-2">
+          <div className="flex items-center gap-2">
             <motion.button
               whileHover={{ scale: 1.1, backgroundColor: "rgba(20, 184, 166, 0.1)" }}
               whileTap={{ scale: 0.9 }}
-              className="p-2 rounded-full text-slate-600 hover:text-teal-600"
+              onClick={() => setIsSearchOpen(!isSearchOpen)}
+              className="hidden lg:flex p-2 rounded-full text-slate-600 hover:text-teal-600"
             >
               <Search className="w-5 h-5" />
             </motion.button>
-            <Link to="/login">
-              <motion.button
-                whileHover={{ scale: 1.1, backgroundColor: "rgba(20, 184, 166, 0.1)" }}
-                whileTap={{ scale: 0.9 }}
-                className="p-2 rounded-full text-slate-600 hover:text-teal-600"
-              >
-                <UserCircle className="w-5 h-5" />
-              </motion.button>
-            </Link>
           </div>
 
           <Link to="/contact">
@@ -148,9 +195,25 @@ export default function Navbar() {
               ))}
               <hr className="border-slate-100 my-2" />
               <div className="flex flex-col gap-3">
+                {isSearchOpen && (
+                  <form onSubmit={handleSearch} className="relative mt-2">
+                    <input
+                      autoFocus
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search..."
+                      className="w-full bg-slate-100 border-none rounded-2xl px-5 py-3 text-base focus:ring-2 focus:ring-teal-500 outline-none transition-all"
+                    />
+                  </form>
+                )}
                 <div className="flex justify-center gap-6 py-2">
-                  <Search className="w-6 h-6 text-slate-600" />
-                  <UserCircle className="w-6 h-6 text-slate-600" />
+                  <button onClick={() => setIsSearchOpen(!isSearchOpen)}>
+                    <Search className={`w-6 h-6 ${isSearchOpen ? 'text-teal-600' : 'text-slate-600'}`} />
+                  </button>
+                  <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
+                    <UserCircle className="w-6 h-6 text-slate-600" />
+                  </Link>
                 </div>
               </div>
             </div>

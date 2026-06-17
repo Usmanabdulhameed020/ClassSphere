@@ -98,9 +98,14 @@ export default function TopNavbar({ onToggleSidebar, user, classes = [], onSelec
           <div className="w-8 h-8 bg-teal-600 rounded-lg flex items-center justify-center text-white font-black text-lg">
             CS
           </div>
-          <span className="text-slate-700 font-bold text-xl tracking-tight hidden sm:block">
-            ClassSphere
-          </span>
+          <div className="flex flex-col sm:block">
+            <span className="text-slate-700 font-bold text-lg sm:text-xl tracking-tight leading-none">
+              ClassSphere
+            </span>
+            <span className="text-[9px] font-black text-teal-600 uppercase tracking-widest sm:hidden leading-none mt-0.5">
+              {user?.role}
+            </span>
+          </div>
         </div>
       </div>
 
