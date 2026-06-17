@@ -14,16 +14,16 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const sendLoginNotification = async (toEmail, username) => {
+const sendWelcomeNotification = async (toEmail, username) => {
   const mailOptions = {
-    from: process.env.EMAIL_FROM,
+    from: `"ClassSphere" <${process.env.EMAIL_FROM}>`,
     to: toEmail,
-    subject: 'Successful Login - ClassSphere',
+    subject: 'Welcome to ClassSphere!',
     html: `
       <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-        <h2 style="color: #0d9488;">Hello ${username},</h2>
-        <p>This is a notification that you have successfully logged into your <strong>ClassSphere</strong> account.</p>
-        <p>If this wasn't you, please secure your account immediately.</p>
+        <h2 style="color: #0d9488;">Welcome to ClassSphere, ${username}!</h2>
+        <p>Thank you for signing up for <strong>ClassSphere</strong>. We are thrilled to have you join our learning ecosystem.</p>
+        <p>Explore your spheres, interact with our AI Assistant, and manage your classes seamlessly.</p>
         <br />
         <p>Best regards,</p>
         <p>The ClassSphere Team</p>
@@ -32,18 +32,16 @@ const sendLoginNotification = async (toEmail, username) => {
   };
 
   try {
-    const info = await transporter.sendMail(mailOptions);
-    console.log(`Login notification sent to ${toEmail}`);
-    console.log('Message ID:', info.messageId);
-    console.log('Response:', info.response);
+    await transporter.sendMail(mailOptions);
+    console.log(`Welcome notification sent to ${toEmail}`);
   } catch (error) {
-    console.error('Error sending email:', error);
+    console.error('Error sending welcome email:', error);
   }
 };
 
 const sendResetCode = async (toEmail, username, code) => {
   const mailOptions = {
-    from: process.env.EMAIL_FROM,
+    from: `"ClassSphere" <${process.env.EMAIL_FROM}>`,
     to: toEmail,
     subject: 'Password Reset Code - ClassSphere',
     html: `
@@ -71,4 +69,60 @@ const sendResetCode = async (toEmail, username, code) => {
   }
 };
 
-module.exports = { sendLoginNotification, sendResetCode };
+const sendContactEmail = async ({ firstName, lastName, email, subject, message }) => {
+  const mailOptions = {
+    from: `"ClassSphere" <${process.env.EMAIL_FROM}>`,
+    to: 'classsphere10@gmail.com',
+    subject: `New Contact Inquiry: ${subject || 'General'}`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+        <h2 style="color: #0d9488;">New Inquiry from ClassSphere</h2>
+        <p><strong>Name:</strong> ${firstName || ''} ${lastName || ''}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Subject:</strong> ${subject || 'General Inquiry'}</p>
+        <p><strong>Message:</strong></p>
+        <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; border-left: 4px solid #0d9488;">
+          ${message.replace(/\n/g, '<br />')}
+        </div>
+        <br />
+        <hr style="border: none; border-top: 1px solid #eee;" />
+        <p style="font-size: 11px; color: #888;">This message was generated from the ClassSphere landing page contact form.</p>
+      </div>
+    `,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log(`Contact email sent for ${email}`);
+  } catch (error) {
+    console.error('Error sending contact email:', error);
+    throw error;
+  }
+};
+
+const sendContactAcknowledgement = async (toEmail, firstName) => {
+  const mailOptions = {
+    from: `"ClassSphere" <${process.env.EMAIL_FROM}>`,
+    to: toEmail,
+    subject: 'We received your inquiry - ClassSphere',
+    html: `
+      <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+        <h2 style="color: #0d9488;">Hello ${firstName || 'there'},</h2>
+        <p>Thank you for reaching out to <strong>ClassSphere</strong>.</p>
+        <p>We have received your inquiry and our support team is reviewing it. We will get back to you as soon as possible.</p>
+        <br />
+        <p>Best regards,</p>
+        <p>The ClassSphere Team</p>
+      </div>
+    `,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log(`Contact acknowledgement sent to ${toEmail}`);
+  } catch (error) {
+    console.error('Error sending contact acknowledgement:', error);
+  }
+};
+
+module.exports = { sendResetCode, sendWelcomeNotification, sendContactEmail, sendContactAcknowledgement };

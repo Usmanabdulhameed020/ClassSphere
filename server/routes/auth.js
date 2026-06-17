@@ -3,7 +3,7 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const auth = require('../middleware/auth');
-const { sendLoginNotification, sendResetCode } = require('../config/mail');
+const { sendResetCode, sendWelcomeNotification, sendContactEmail, sendContactAcknowledgement } = require('../config/mail');
 
 const { OAuth2Client } = require('google-auth-library');
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -34,6 +34,9 @@ router.post('/register', async (req, res) => {
     }
 
     await user.save();
+
+    // Trigger Welcome Email Notification
+    await sendWelcomeNotification(user.email, user.username);
 
     const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
     res.json({ token, user: { id: user._id, username, email, role: user.role } });
@@ -138,9 +141,6 @@ router.post('/login', async (req, res) => {
 
     const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-    // Trigger Email Notification
-    await sendLoginNotification(user.email, user.username);
-
     res.json({ token, user: { id: user._id, username: user.username, email: user.email, role: user.role } });
   } catch (error) {
     console.error('Auth Error:', error);
@@ -204,6 +204,9 @@ router.post('/google', async (req, res) => {
 
     await user.save();
 
+    // Trigger Welcome Email Notification for Google Sign-Up
+    await sendWelcomeNotification(user.email, user.username);
+
     const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
     res.json({ 
       token, 
@@ -242,6 +245,26 @@ router.patch('/profile', auth, async (req, res) => {
     res.json(user);
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// @route   POST /api/auth/contact
+// @desc    Submit a contact inquiry and send emails
+router.post('/contact', async (req, res) => {
+  const { firstName, lastName, email, subject, message } = req.body;
+
+  if (!email || !message) {
+    return res.status(400).json({ message: 'Email and message are required.' });
+  }
+
+  try {
+    // Send email to support and acknowledgement to the user
+    await sendContactEmail({ firstName, lastName, email, subject, message });
+    await sendContactAcknowledgement(email, firstName);
+    res.json({ message: 'Inquiry transmitted successfully' });
+  } catch (error) {
+    console.error('Contact Route Error:', error);
+    res.status(500).json({ message: 'Server error: failed to submit inquiry' });
   }
 });
 
