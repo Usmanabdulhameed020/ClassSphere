@@ -155,7 +155,16 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-4 sm:p-6 pt-16 sm:pt-24 md:pt-32">
+    <div className="min-h-screen bg-white flex items-center justify-center p-4 sm:p-6 pt-16 sm:pt-24 md:pt-32 relative">
+      {/* Back to Landing Page Button */}
+      <Link 
+        to="/" 
+        className="absolute top-6 left-6 flex items-center gap-2 text-slate-500 hover:text-teal-600 transition-all font-black text-xs uppercase tracking-wider group"
+      >
+        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+        <span>Back to Home</span>
+      </Link>
+
       <div className="w-full max-w-md space-y-4 sm:space-y-8">
         {/* Header */}
         <div className="text-center space-y-2 sm:space-y-4">
