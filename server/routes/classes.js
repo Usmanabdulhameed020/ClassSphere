@@ -62,8 +62,12 @@ router.post('/join', auth, async (req, res) => {
   const { code } = req.body;
 
   try {
-    const cls = await Class.findOne({ code });
-    if (!cls) return res.status(404).json({ message: 'Class not found' });
+    // Normalize: trim whitespace and convert to lowercase for case-insensitive matching
+    const normalizedCode = code?.trim().toLowerCase();
+    if (!normalizedCode) return res.status(400).json({ message: 'Class code is required' });
+
+    const cls = await Class.findOne({ code: normalizedCode });
+    if (!cls) return res.status(404).json({ message: 'Class not found. Please check the code and try again.' });
 
     // Ensure creator / co-teachers cannot join as students
     if (cls.creator.toString() === req.user.id.toString() || cls.teachers.includes(req.user.id)) {

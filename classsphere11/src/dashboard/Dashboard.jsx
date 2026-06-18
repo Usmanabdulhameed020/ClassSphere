@@ -137,7 +137,9 @@ export default function Dashboard() {
     e.preventDefault();
     setIsActionLoading(true);
     try {
-      await dashboardService.joinClass(classCode);
+      // Normalize code: trim whitespace and convert to lowercase
+      const normalizedCode = classCode.trim().toLowerCase();
+      await dashboardService.joinClass(normalizedCode);
       setShowJoinModal(false);
       setClassCode('');
       fetchDashboardData(user);
@@ -279,8 +281,8 @@ export default function Dashboard() {
                     type="text" required
                     value={classCode}
                     onChange={(e) => setClassCode(e.target.value)}
-                    placeholder="Enter 7-digit code"
-                    className="w-full px-6 py-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-teal-500 focus:bg-white transition-all outline-none font-bold text-center tracking-widest text-xl uppercase"
+                    placeholder="Enter class code"
+                    className="w-full px-6 py-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-teal-500 focus:bg-white transition-all outline-none font-bold text-center tracking-widest text-xl"
                   />
                 </div>
                 <button 
