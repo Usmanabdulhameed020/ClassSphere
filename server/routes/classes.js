@@ -111,4 +111,64 @@ router.post('/join', auth, async (req, res) => {
   }
 });
 
+// @route   POST /api/classes/:id/leave
+// @desc    Leave a class (students only)
+router.post('/:id/leave', auth, async (req, res) => {
+  try {
+    const cls = await Class.findById(req.params.id);
+    if (!cls) return res.status(404).json({ message: 'Class not found' });
+
+    // Prevent the creator/teacher from leaving via this route
+    if (cls.creator.toString() === req.user.id.toString() || cls.teachers.map(t => t.toString()).includes(req.user.id.toString())) {
+      return res.status(400).json({ message: 'Instructors cannot leave a class they own. Delete it instead.' });
+    }
+
+    if (!cls.students.map(s => s.toString()).includes(req.user.id.toString())) {
+      return res.status(400).json({ message: 'You are not a member of this class.' });
+    }
+
+    cls.students = cls.students.filter(s => s.toString() !== req.user.id.toString());
+    await cls.save();
+
+    // Notify teachers about the student leaving
+    const recipients = [...new Set([cls.creator.toString(), ...cls.teachers.map(t => t.toString())])].filter(r => r !== req.user.id.toString());
+    for (const recipientId of recipients) {
+      await createNotification({
+        recipient: recipientId,
+        sender: req.user.id,
+        type: 'system',
+        title: 'Member Left',
+        message: `${req.user.username} left "${cls.name}".`,
+        link: '/dashboard'
+      });
+    }
+
+    res.json({ message: 'Successfully left the class.' });
+  } catch (error) {
+    console.error('Leave Class Error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// @route   DELETE /api/classes/:id
+// @desc    Delete a class (creator only)
+router.delete('/:id', auth, async (req, res) => {
+  try {
+    const cls = await Class.findById(req.params.id);
+    if (!cls) return res.status(404).json({ message: 'Class not found' });
+
+    // Only the creator can delete the class
+    if (cls.creator.toString() !== req.user.id.toString()) {
+      return res.status(403).json({ message: 'Only the class creator can delete this class.' });
+    }
+
+    await Class.findByIdAndDelete(req.params.id);
+
+    res.json({ message: 'Class deleted successfully.' });
+  } catch (error) {
+    console.error('Delete Class Error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 module.exports = router;

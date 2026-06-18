@@ -47,6 +47,10 @@ export default function OverviewPage({ classes: propClasses, onSelectClass }) {
     );
   }
 
+  const handleClassRemoved = (classId) => {
+    setClasses(prev => prev.filter(c => c._id !== classId));
+  };
+
   return (
     <div className="pb-20">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8">
@@ -58,6 +62,7 @@ export default function OverviewPage({ classes: propClasses, onSelectClass }) {
               id: cls._id
             }} 
             onSelectClass={onSelectClass}
+            onClassRemoved={handleClassRemoved}
           />
         ))}
       </div>

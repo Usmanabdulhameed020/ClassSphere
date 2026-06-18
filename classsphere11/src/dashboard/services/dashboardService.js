@@ -34,6 +34,16 @@ export const dashboardService = {
     return response.data;
   },
 
+  leaveClass: async (classId) => {
+    const response = await axios.post(`${API_URL}/classes/${classId}/leave`, {}, getAuthHeader());
+    return response.data;
+  },
+
+  deleteClass: async (classId) => {
+    const response = await axios.delete(`${API_URL}/classes/${classId}`, getAuthHeader());
+    return response.data;
+  },
+
   // Classroom Methods
   getAnnouncements: async (classId) => {
     const response = await axios.get(`${API_URL}/classroom/${classId}/announcements`, getAuthHeader());

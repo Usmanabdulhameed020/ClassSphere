@@ -59,7 +59,7 @@ app.use('/api/messages', messageRoutes);
 
 // Catch-all route to serve the React application for client-side routing
 // This ensures direct URL access and page refreshes work correctly on deployed SPA
-app.get('*', (req, res) => {
+app.get('/{*path}', (req, res) => {
   // Don't catch API routes (they're already handled by route middleware above)
   if (req.path.startsWith('/api')) {
     return res.status(404).json({ message: 'API endpoint not found' });

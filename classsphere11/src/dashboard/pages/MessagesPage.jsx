@@ -501,7 +501,6 @@ export default function MessagesPage() {
                          </div>
                          <div>
                             <p className="font-bold text-slate-900 text-sm">{res.username}</p>
-                            <p className="text-[10px] font-black text-teal-500 uppercase tracking-widest">{res.role}</p>
                          </div>
                       </button>
                     ))}
@@ -589,7 +588,6 @@ export default function MessagesPage() {
                 </div>
                 <div>
                   <h3 className="font-bold text-slate-900 leading-tight">{getOtherParticipant(activeConversation).username}</h3>
-                  <p className="text-[10px] font-black text-teal-500 uppercase tracking-widest">{getOtherParticipant(activeConversation).role}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -803,7 +801,6 @@ export default function MessagesPage() {
                          </div>
                          <div>
                             <p className="font-bold text-slate-900 text-sm">{res.username}</p>
-                            <p className="text-[10px] font-black text-teal-500 uppercase tracking-widest">{res.role}</p>
                          </div>
                       </button>
                     ))
