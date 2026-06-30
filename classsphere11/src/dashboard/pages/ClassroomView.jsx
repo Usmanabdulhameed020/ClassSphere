@@ -76,7 +76,11 @@ export default function ClassroomView({ classData, user, onBack }) {
       setIsSummarizing(false);
     }
   };
-  const [activeSubTab, setActiveSubTab] = useState('Stream');
+  const [activeSubTab, setActiveSubTab] = useState(() => sessionStorage.getItem('activeSubTab') || 'Stream');
+
+  useEffect(() => {
+    sessionStorage.setItem('activeSubTab', activeSubTab);
+  }, [activeSubTab]);
   const [announcements, setAnnouncements] = useState([]);
   const [assignments, setAssignments] = useState([]);
   const [materials, setMaterials] = useState([]);

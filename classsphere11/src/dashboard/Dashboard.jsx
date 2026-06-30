@@ -14,7 +14,7 @@ import { getSocket } from './utils/socketManager';
 import { cn } from './utils';
 
 export default function Dashboard() {
-  const [activeTab, setActiveTab] = useState('Home');
+  const [activeTab, setActiveTab] = useState(() => sessionStorage.getItem('activeTab') || 'Home');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [user, setUser] = useState(null);
   const [classes, setClasses] = useState(null);
@@ -31,6 +31,32 @@ export default function Dashboard() {
 
   const [isAIOpen, setIsAIOpen] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    sessionStorage.setItem('activeTab', activeTab);
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (selectedClass) {
+      sessionStorage.setItem('selectedClassId', (selectedClass._id || selectedClass.id).toString());
+    } else {
+      sessionStorage.removeItem('selectedClassId');
+    }
+  }, [selectedClass]);
+
+  useEffect(() => {
+    if (classes && classes.length > 0) {
+      const storedClassId = sessionStorage.getItem('selectedClassId');
+      if (storedClassId) {
+        const found = classes.find(c => (c._id || c.id)?.toString() === storedClassId);
+        if (found) {
+          setSelectedClass(found);
+        } else {
+          sessionStorage.removeItem('selectedClassId');
+        }
+      }
+    }
+  }, [classes]);
 
   const fetchUnreadCount = async () => {
     try {
